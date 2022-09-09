@@ -1,72 +1,40 @@
-use bevy::{prelude::*, window::PresentMode, render::camera::ScalingMode};
+use bevy::{prelude::*, window::PresentMode};
+use moveable::MoveablePlugin;
+use player::PlayerPlugin;
+use projectile::ProjectilePlugin;
+
+use bevy::diagnostic::{FrameTimeDiagnosticsPlugin, LogDiagnosticsPlugin};
 
 pub const BACKGROUND_COLOR: Color = Color::rgb(0.1, 0.1, 0.1);
-pub const ASPECT_RATIO: f32 = 9. / 16.;
-pub const TILE_SIZE: f32 = 0.1;
+pub const ASPECT_RATIO: f32 = 16. / 9.;
+pub const SCREEN_HEIGHT: f32 = 600.;
 
-#[derive(Component)]
-pub struct Player {
-    speed: f32,
-}
+const PLAYER_SPRITE: &str = "ship.png";
+const PROJECTILE_SPRITE: &str = "projectile.png";
+
+mod moveable;
+mod player;
+mod projectile;
 
 fn main() {
-    let height = 800.;
-
+    let height = SCREEN_HEIGHT;
     App::new()
         .insert_resource(WindowDescriptor {
             title: "Planes".to_string(),
             height: height,
             width: height * ASPECT_RATIO,
             resizable: false,
-            present_mode: PresentMode::Immediate,
+            present_mode: PresentMode::AutoVsync,
             ..Default::default()
         })
-        .add_startup_system(setup)
         .add_startup_system(spawn_camera)
-        .add_system(player_movement)
         .add_plugins(DefaultPlugins)
+        .add_plugin(LogDiagnosticsPlugin::default())
+        .add_plugin(FrameTimeDiagnosticsPlugin::default())
+        .add_plugin(PlayerPlugin)
+        .add_plugin(ProjectilePlugin)
+        .add_plugin(MoveablePlugin)
         .run();
-}
-
-fn player_movement(
-    mut player_query: Query<(&Player,&mut Transform), With<Player>>, 
-    keyboard: Res<Input<KeyCode>>,
-    time: Res<Time>
-) {
-    let (player, mut player_transform) = player_query.single_mut();
-
-    let mut y_delta = 0.;
-    if keyboard.pressed(KeyCode::W) {
-        y_delta += 1. * time.delta_seconds() * player.speed;
-    }
-    if keyboard.pressed(KeyCode::S) {
-        y_delta -= 1. * time.delta_seconds() * player.speed;
-    }
-
-    let mut x_delta = 0.;
-    if keyboard.pressed(KeyCode::A) {
-        x_delta -= 1. * time.delta_seconds() * player.speed;
-    }
-    if keyboard.pressed(KeyCode::D) {
-        x_delta += 1. * time.delta_seconds() * player.speed;
-    }
-    
-    player_transform.translation += Vec3::new(x_delta, y_delta, 0.);
-}
-
-fn setup(mut commands: Commands, asset: Res<AssetServer>) {
-    commands.spawn_bundle(SpriteBundle {
-        sprite: Sprite {
-            custom_size: Some(Vec2::splat(50.)),
-            ..Default::default()
-        },
-        texture: asset.load("ship.png"),
-        transform: Transform::from_xyz(0., 0., 100.),
-        ..Default::default()
-    })
-    .insert(Player {
-        speed: 250.
-    });
 }
 
 fn spawn_camera(mut commands: Commands) {
