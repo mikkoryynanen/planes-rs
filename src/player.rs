@@ -107,5 +107,6 @@ fn shooting_system(
         .insert(Moveable {
             direction: Vec2::new(0., 1.),
             speed: 250.,
+            auto_destroy: true
         });
 }

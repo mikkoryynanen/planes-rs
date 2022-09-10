@@ -3,6 +3,7 @@ use moveable::MoveablePlugin;
 use player::PlayerPlugin;
 use projectile::ProjectilePlugin;
 
+use bevy_inspector_egui::WorldInspectorPlugin;
 use bevy::diagnostic::{FrameTimeDiagnosticsPlugin, LogDiagnosticsPlugin};
 
 pub const BACKGROUND_COLOR: Color = Color::rgb(0.1, 0.1, 0.1);
@@ -29,8 +30,11 @@ fn main() {
         })
         .add_startup_system(spawn_camera)
         .add_plugins(DefaultPlugins)
+        // Development =============================================
+        .add_plugin(WorldInspectorPlugin::new())
         .add_plugin(LogDiagnosticsPlugin::default())
         .add_plugin(FrameTimeDiagnosticsPlugin::default())
+        // ==========================================================
         .add_plugin(PlayerPlugin)
         .add_plugin(ProjectilePlugin)
         .add_plugin(MoveablePlugin)
