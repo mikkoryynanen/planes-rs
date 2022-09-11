@@ -1,8 +1,8 @@
 use bevy::{prelude::*, sprite::collide_aabb::collide, time::FixedTimestep};
 
 use crate::{
-    enemy::Enemy, moveable::Moveable, player::Player, projectile::Projectile,
-    sprite_spawner::spawn_entity, PROJECTILE_SPRITE, SPRITE_SCALE,
+    enemy::Enemy, entities::entity_loader::spawn_entity, moveable::Moveable, player::Player,
+    projectile::Projectile, PROJECTILE_SPRITE, SPRITE_SCALE,
 };
 
 const TIMESTEP_1_PER_SECOND: f64 = 30.0 / 60.0;

@@ -1,7 +1,8 @@
 use bevy::prelude::*;
 
 use crate::{
-    shoot::Shootable, sprite_spawner::spawn_entity, ASPECT_RATIO, PLAYER_SPRITE, SCREEN_HEIGHT,
+    entities::entity_loader::spawn_entity, shoot::Shootable, ASPECT_RATIO, PLAYER_SPRITE,
+    SCREEN_HEIGHT,
 };
 
 #[derive(Component)]

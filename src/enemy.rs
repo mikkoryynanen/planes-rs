@@ -1,6 +1,8 @@
 use bevy::prelude::*;
 
-use crate::{moveable::Moveable, shoot::Shootable, sprite_spawner::spawn_entity, ENEMY_SPRITE};
+use crate::{
+    entities::entity_loader::spawn_entity, moveable::Moveable, shoot::Shootable, ENEMY_SPRITE,
+};
 
 #[derive(Component)]
 pub struct Enemy;
