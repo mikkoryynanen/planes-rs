@@ -1,7 +1,6 @@
-use bevy::prelude::*;
+use bevy::{prelude::*, sprite::collide_aabb::collide};
 
-use crate::SCREEN_HEIGHT;
-
+use crate::{enemy::Enemy, player::Player, projectile::Projectile, SCREEN_HEIGHT};
 #[derive(Component)]
 pub struct Moveable {
     pub direction: Vec2,
@@ -31,10 +30,9 @@ fn update_moveables(
 
         if moveable.auto_destroy {
             if moveable_transform.translation.y > SCREEN_HEIGHT
-               //  || moveable_transform.translation.y < 0.
+            //  || moveable_transform.translation.y < 0.
             {
                 commands.entity(entity).despawn();
-                println!("moveale destroyed")
             }
         }
     }

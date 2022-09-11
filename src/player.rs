@@ -1,14 +1,8 @@
-use bevy::{prelude::*, time::FixedTimestep};
+use bevy::prelude::*;
 
 use crate::{
-    moveable::Moveable, projectile::Projectile, ASPECT_RATIO, PROJECTILE_SPRITE, SCREEN_HEIGHT,
+    shoot::Shootable, sprite_spawner::spawn_entity, ASPECT_RATIO, PLAYER_SPRITE, SCREEN_HEIGHT,
 };
-
-use self::sprite_spawner::spawn_entity;
-
-mod sprite_spawner;
-
-const TIMESTEP_1_PER_SECOND: f64 = 30.0 / 60.0;
 
 #[derive(Component)]
 pub struct Player {
@@ -19,28 +13,24 @@ pub struct PlayerPlugin;
 
 impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut App) {
-        app.add_startup_system(setup)
-            .add_system(movement)
-            .add_system_set(
-                SystemSet::new()
-                    .with_run_criteria(FixedTimestep::step(TIMESTEP_1_PER_SECOND))
-                    .with_system(shooting_system),
-            );
+        app.add_startup_system(setup).add_system(movement);
     }
 }
 
 fn setup(mut commands: Commands, asset: Res<AssetServer>) {
+    let player_entity = spawn_entity(
+        &mut commands,
+        &asset,
+        PLAYER_SPRITE,
+        Vec3::new(0., 0., 100.),
+        Vec3::splat(1.),
+    );
+
     commands
-        .spawn_bundle(SpriteBundle {
-            sprite: Sprite {
-                custom_size: Some(Vec2::splat(50.)),
-                ..Default::default()
-            },
-            texture: asset.load("ship.png"),
-            transform: Transform::from_xyz(0., 0., 100.),
-            ..Default::default()
-        })
-        .insert(Player { speed: 450. });
+        .entity(player_entity)
+        .insert(Name::new("Player"))
+        .insert(Player { speed: 450. })
+        .insert(Shootable);
 }
 
 fn movement(
@@ -81,32 +71,4 @@ fn movement(
     if player_transform.translation.y <= -SCREEN_HEIGHT / 2. {
         player_transform.translation.y = -SCREEN_HEIGHT / 2.;
     }
-}
-
-fn shooting_system(
-    mut commands: Commands,
-    player_query: Query<&Transform, With<Player>>,
-    asset_server: Res<AssetServer>,
-) {
-    let player_transform = player_query.single();
-    let projectile = spawn_entity(
-        &mut commands,
-        &asset_server,
-        PROJECTILE_SPRITE,
-        Vec3::new(
-            player_transform.translation.x,
-            player_transform.translation.y,
-            100.,
-        ),
-        Vec3::splat(0.35),
-    );
-
-    commands
-        .entity(projectile)
-        .insert(Projectile)
-        .insert(Moveable {
-            direction: Vec2::new(0., 1.),
-            speed: 250.,
-            auto_destroy: true
-        });
 }
