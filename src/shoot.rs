@@ -8,7 +8,9 @@ use crate::{
 const TIMESTEP_1_PER_SECOND: f64 = 30.0 / 60.0;
 
 #[derive(Component)]
-pub struct Shootable;
+pub struct Shootable {
+    pub direction: Vec3,
+}
 
 pub struct ShootPlugin;
 
@@ -47,10 +49,10 @@ fn collision_check(
 
 fn shooting_system(
     mut commands: Commands,
-    shooter_query: Query<&Transform, With<Shootable>>,
+    shooter_query: Query<(&Transform, &Shootable), With<Shootable>>,
     asset_server: Res<AssetServer>,
 ) {
-    for shooter_transform in shooter_query.iter() {
+    for (shooter_transform, shootable) in shooter_query.iter() {
         let projectile = spawn_entity(
             &mut commands,
             &asset_server,
@@ -68,7 +70,7 @@ fn shooting_system(
             .insert(Name::new("Projectile"))
             .insert(Projectile)
             .insert(Moveable {
-                direction: Vec2::new(0., 1.),
+                direction: shootable.direction,
                 speed: 250.,
                 auto_destroy: true,
             });

@@ -28,9 +28,10 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
         .insert(Enemy)
         .insert(Moveable {
             auto_destroy: false,
-            direction: Vec2::new(0., -0.1),
+            direction: Vec3::new(0., -1., 0.),
             speed: 50.,
         })
-        // .insert(Shootable)
-        ;
+        .insert(Shootable {
+            direction: Vec3::new(0., -1., 0.),
+        });
 }

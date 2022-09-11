@@ -30,7 +30,9 @@ fn setup(mut commands: Commands, asset: Res<AssetServer>) {
         .entity(player_entity)
         .insert(Name::new("Player"))
         .insert(Player { speed: 450. })
-        .insert(Shootable);
+        .insert(Shootable {
+            direction: Vec3::new(0., 1., 0.),
+        });
 }
 
 fn movement(

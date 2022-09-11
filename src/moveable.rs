@@ -3,7 +3,7 @@ use bevy::{prelude::*, sprite::collide_aabb::collide};
 use crate::{enemy::Enemy, player::Player, projectile::Projectile, SCREEN_HEIGHT};
 #[derive(Component)]
 pub struct Moveable {
-    pub direction: Vec2,
+    pub direction: Vec3,
     pub speed: f32,
     pub auto_destroy: bool,
 }
@@ -27,6 +27,10 @@ fn update_moveables(
             moveable.direction.y * moveable.speed * time.delta_seconds(),
             0.,
         );
+
+        let angle = (moveable.direction - moveable_transform.translation)
+            .angle_between(moveable_transform.translation);
+        moveable_transform.rotation = Quat::from_rotation_z(angle);
 
         if moveable.auto_destroy {
             if moveable_transform.translation.y > SCREEN_HEIGHT
