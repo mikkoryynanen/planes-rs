@@ -1,6 +1,6 @@
-use bevy::{prelude::*, sprite::collide_aabb::collide};
+use bevy::prelude::*;
 
-use crate::{enemy::Enemy, player::Player, projectile::Projectile, SCREEN_HEIGHT};
+use crate::SCREEN_HEIGHT;
 #[derive(Component)]
 pub struct Moveable {
     pub direction: Vec3,

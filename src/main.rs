@@ -14,15 +14,18 @@ pub const BACKGROUND_COLOR: Color = Color::rgb(0.1, 0.1, 0.1);
 pub const ASPECT_RATIO: f32 = 16. / 9.;
 pub const SCREEN_HEIGHT: f32 = 600.;
 
+// Texture Atlas settings =========================
 pub const TILE_SIZE: f32 = 16.;
 pub const TILE_PADDING: f32 = 1.;
 pub const TILES_PATH: &str = "tiles.png";
+pub const PLANES_PATH: &str = "planes.png";
+// ================================================
 
-pub const SPRITE_SCALE: f32 = 50.;
-const PLAYER_SPRITE: &str = "ship.png";
-const PROJECTILE_SPRITE: &str = "projectile.png";
+// Sprite settings ================================
+pub const SPRITE_SCALE: f32 = 7.;
 const ENEMY_SPRITE: &str = "enemy.png";
 const BACKGROUND_SPRITE: &str = "background.png";
+// ================================================
 
 mod enemy;
 mod entities;

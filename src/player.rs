@@ -1,8 +1,9 @@
 use bevy::prelude::*;
 
 use crate::{
-    entities::entity_loader::spawn_entity, shoot::Shootable, ASPECT_RATIO, PLAYER_SPRITE,
-    SCREEN_HEIGHT,
+    entities::entity_loader::{craete_entity_from_atlas, GameSheets},
+    shoot::Shootable,
+    ASPECT_RATIO, SCREEN_HEIGHT, SPRITE_SCALE,
 };
 
 #[derive(Component)]
@@ -18,13 +19,13 @@ impl Plugin for PlayerPlugin {
     }
 }
 
-fn setup(mut commands: Commands, asset: Res<AssetServer>) {
-    let player_entity = spawn_entity(
+fn setup(mut commands: Commands, sheet: Res<GameSheets>) {
+    let player_entity = craete_entity_from_atlas(
         &mut commands,
-        &asset,
-        PLAYER_SPRITE,
+        &sheet.planes,
+        2,
         Vec3::new(0., 0., 100.),
-        Vec3::splat(1.),
+        SPRITE_SCALE,
     );
 
     commands

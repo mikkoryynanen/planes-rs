@@ -1,7 +1,10 @@
 use bevy::prelude::*;
 
 use crate::{
-    entities::entity_loader::spawn_entity, moveable::Moveable, shoot::Shootable, ENEMY_SPRITE,
+    entities::entity_loader::{craete_entity_from_atlas, spawn_entity, GameSheets},
+    moveable::Moveable,
+    shoot::Shootable,
+    SPRITE_SCALE,
 };
 
 #[derive(Component)]
@@ -15,17 +18,17 @@ impl Plugin for EnemyPlugin {
     }
 }
 
-fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
-    let entity = spawn_entity(
+fn setup(mut commands: Commands, sheets: Res<GameSheets>) {
+    let enemy_entity = craete_entity_from_atlas(
         &mut commands,
-        &asset_server,
-        ENEMY_SPRITE,
+        &sheets.planes,
+        3,
         Vec3::new(0., 250., 0.),
-        Vec3::splat(1.),
+        SPRITE_SCALE,
     );
 
     commands
-        .entity(entity)
+        .entity(enemy_entity)
         .insert(Name::new("Enemy"))
         .insert(Enemy)
         .insert(Moveable {
