@@ -2,11 +2,11 @@ use bevy::{prelude::*, window::PresentMode};
 use bevy_editor_pls::EditorPlugin;
 use enemy::EnemyPlugin;
 use entities::entity_loader::{spawn_entity, TilemapPlugin};
-use moveable::{Moveable, MoveablePlugin};
+use event_system::EventSystemPlugin;
+use moveable::MoveablePlugin;
 use player::PlayerPlugin;
-use projectile::ProjectilePlugin;
 
-use bevy::diagnostic::{FrameTimeDiagnosticsPlugin, LogDiagnosticsPlugin};
+// use bevy::diagnostic::{FrameTimeDiagnosticsPlugin, LogDiagnosticsPlugin};
 use bevy_inspector_egui::WorldInspectorPlugin;
 use shoot::ShootPlugin;
 
@@ -23,12 +23,12 @@ pub const PLANES_PATH: &str = "planes.png";
 
 // Sprite settings ================================
 pub const SPRITE_SCALE: f32 = 7.;
-const ENEMY_SPRITE: &str = "enemy.png";
 const BACKGROUND_SPRITE: &str = "background.png";
 // ================================================
 
 mod enemy;
 mod entities;
+mod event_system;
 mod moveable;
 mod player;
 mod projectile;
@@ -45,7 +45,7 @@ fn main() {
             present_mode: PresentMode::AutoVsync,
             ..Default::default()
         })
-        .add_startup_system(spawn_camera)
+        .add_startup_system(setup)
         .add_plugins(DefaultPlugins)
         // Development =============================================
         .add_plugin(EditorPlugin)
@@ -55,10 +55,10 @@ fn main() {
         // ==========================================================
         // Game plugins =============================================
         .add_plugin(TilemapPlugin)
+        .add_plugin(EventSystemPlugin)
         // ==========================================================
         // Gameplay plugins =========================================
         .add_plugin(PlayerPlugin)
-        .add_plugin(ProjectilePlugin)
         .add_plugin(MoveablePlugin)
         .add_plugin(EnemyPlugin)
         .add_plugin(ShootPlugin)
@@ -67,7 +67,7 @@ fn main() {
         .run();
 }
 
-fn spawn_camera(mut commands: Commands, asset_server: Res<AssetServer>) {
+fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     let mut camera = Camera2dBundle::default();
 
     // camera.projection.scaling_mode = ScalingMode::None;

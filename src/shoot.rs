@@ -2,7 +2,8 @@ use bevy::{prelude::*, sprite::collide_aabb::collide, time::FixedTimestep};
 
 use crate::{
     enemy::Enemy,
-    entities::entity_loader::{craete_entity_from_atlas, spawn_entity, GameSheets},
+    entities::entity_loader::{craete_entity_from_atlas, GameSheets},
+    event_system::DamageEvent,
     moveable::Moveable,
     projectile::Projectile,
     SPRITE_SCALE,
@@ -19,17 +20,19 @@ pub struct ShootPlugin;
 
 impl Plugin for ShootPlugin {
     fn build(&self, app: &mut App) {
-        app.add_system(collision_check).add_system_set(
-            // TODO: Placeholder implemention
-            SystemSet::new()
-                .with_run_criteria(FixedTimestep::step(TIMESTEP_1_PER_SECOND))
-                .with_system(shooting_system),
-        );
+        app.add_system(collision_check)
+            // .add_system(process_damage_events)
+            .add_system_set(
+                // TODO: Placeholder implemention
+                SystemSet::new()
+                    .with_run_criteria(FixedTimestep::step(TIMESTEP_1_PER_SECOND))
+                    .with_system(shooting_system),
+            );
     }
 }
-
 fn collision_check(
     mut commands: Commands,
+    mut damage_events: EventWriter<DamageEvent>,
     enemies_query: Query<(Entity, &Transform), With<Enemy>>,
     projectiles_query: Query<(Entity, &Transform), With<Projectile>>,
 ) {
@@ -43,8 +46,11 @@ fn collision_check(
             );
             if collision.is_some() {
                 commands.entity(projectile_entity).despawn();
-                // TODO reduce enemy health and despawn once it reaches 0
-                // commands.entity(enemy_entity).despawn();
+
+                damage_events.send(DamageEvent {
+                    damage: 10,
+                    target: enemy_entity,
+                });
             }
         }
     }
@@ -55,6 +61,11 @@ fn shooting_system(
     shooter_query: Query<(&Transform, &Shootable), With<Shootable>>,
     sheet: Res<GameSheets>,
 ) {
+    let mut events = Events::<DamageEvent>::default();
+    let mut reader = events.get_reader();
+    events.update();
+    assert_eq!(reader.iter(&events).count(), 0);
+
     for (shooter_transform, shootable) in shooter_query.iter() {
         let projectile = craete_entity_from_atlas(
             &mut commands,

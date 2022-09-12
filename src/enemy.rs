@@ -1,14 +1,22 @@
 use bevy::prelude::*;
 
 use crate::{
-    entities::entity_loader::{craete_entity_from_atlas, spawn_entity, GameSheets},
+    entities::entity_loader::{craete_entity_from_atlas, GameSheets},
     moveable::Moveable,
     shoot::Shootable,
     SPRITE_SCALE,
 };
 
 #[derive(Component)]
-pub struct Enemy;
+pub struct Enemy {
+    pub health: i32,
+}
+
+impl Enemy {
+    pub fn take_damage(&mut self, amount: i32) {
+        self.health -= amount;
+    }
+}
 
 pub struct EnemyPlugin;
 
@@ -30,7 +38,7 @@ fn setup(mut commands: Commands, sheets: Res<GameSheets>) {
     commands
         .entity(enemy_entity)
         .insert(Name::new("Enemy"))
-        .insert(Enemy)
+        .insert(Enemy { health: 100 })
         .insert(Moveable {
             auto_destroy: false,
             direction: Vec3::new(0., -1., 0.),

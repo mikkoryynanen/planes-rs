@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::{PLANES_PATH, SPRITE_SCALE, TILES_PATH, TILE_PADDING, TILE_SIZE};
+use crate::{PLANES_PATH, TILES_PATH, TILE_PADDING, TILE_SIZE};
 
 pub struct TilemapPlugin;
 
@@ -15,7 +15,6 @@ impl Plugin for TilemapPlugin {
     }
 }
 
-#[deprecated]
 pub fn spawn_entity(
     commands: &mut Commands,
     asset_server: &Res<AssetServer>,
