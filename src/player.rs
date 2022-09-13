@@ -5,6 +5,7 @@ use leafwing_input_manager::{
 };
 
 use crate::{
+    components::Collider,
     entities::entity_loader::{craete_entity_from_atlas, GameSheets},
     input_actions::InputAction,
     shoot::Shootable,
@@ -39,6 +40,7 @@ fn setup(mut commands: Commands, sheet: Res<GameSheets>) {
         .entity(player_entity)
         .insert(Name::new("Player"))
         .insert(Player { speed: 450. })
+        .insert(Collider)
         .insert(Shootable {
             direction: Vec3::new(0., 1., 0.),
             shoot_speed_per_ms: 500,

@@ -36,6 +36,8 @@ mod moveable;
 mod player;
 mod projectile;
 mod shoot;
+// TODO Generic file for components, maybe replace this in the future
+mod components;
 
 fn main() {
     let height = SCREEN_HEIGHT;

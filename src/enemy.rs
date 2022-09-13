@@ -1,6 +1,7 @@
 use bevy::{prelude::*, time::Stopwatch};
 
 use crate::{
+    components::Collider,
     entities::entity_loader::{craete_entity_from_atlas, GameSheets},
     moveable::Moveable,
     shoot::Shootable,
@@ -39,6 +40,7 @@ fn setup(mut commands: Commands, sheets: Res<GameSheets>) {
         .entity(enemy_entity)
         .insert(Name::new("Enemy"))
         .insert(Enemy { health: 100 })
+        .insert(Collider)
         .insert(Moveable {
             auto_destroy: false,
             direction: Vec3::new(0., -1., 0.),

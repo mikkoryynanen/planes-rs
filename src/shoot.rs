@@ -1,8 +1,10 @@
 use crate::{
+    components::Collider,
     enemy::Enemy,
     entities::entity_loader::{craete_entity_from_atlas, GameSheets},
     event_system::DamageEvent,
     moveable::Moveable,
+    player::Player,
     projectile::Projectile,
     SPRITE_SCALE,
 };
@@ -39,24 +41,26 @@ impl Plugin for ShootPlugin {
 fn collision_check(
     mut commands: Commands,
     mut damage_events: EventWriter<DamageEvent>,
-    enemies_query: Query<(Entity, &Transform), With<Enemy>>,
-    projectiles_query: Query<(Entity, &Transform), With<Projectile>>,
+    entities_query: Query<(Entity, &Transform), With<Collider>>,
+    projectiles_query: Query<(Entity, &Projectile, &Transform), With<Projectile>>,
 ) {
-    for (enemy_entity, enemy_transform) in enemies_query.iter() {
-        for (projectile_entity, projectile_tranform) in projectiles_query.iter() {
-            let collision = collide(
-                enemy_transform.translation,
-                Vec2::splat(SPRITE_SCALE),
-                projectile_tranform.translation,
-                Vec2::splat(SPRITE_SCALE),
-            );
-            if collision.is_some() {
-                commands.entity(projectile_entity).despawn();
+    for (entity, entity_transform) in entities_query.iter() {
+        for (projectile_entity, projectile, projectile_tranform) in projectiles_query.iter() {
+            if projectile.source != entity {
+                let collision = collide(
+                    entity_transform.translation,
+                    Vec2::splat(SPRITE_SCALE),
+                    projectile_tranform.translation,
+                    Vec2::splat(SPRITE_SCALE),
+                );
+                if collision.is_some() {
+                    commands.entity(projectile_entity).despawn();
 
-                damage_events.send(DamageEvent {
-                    damage: 10,
-                    target: enemy_entity,
-                });
+                    damage_events.send(DamageEvent {
+                        damage: 10,
+                        target: entity,
+                    });
+                }
             }
         }
     }
@@ -64,11 +68,11 @@ fn collision_check(
 
 fn shooting_system(
     mut commands: Commands,
-    mut shooter_query: Query<(&mut Transform, &mut Shootable), With<Shootable>>,
+    mut shooter_query: Query<(Entity, &mut Transform, &mut Shootable), With<Shootable>>,
     sheet: Res<GameSheets>,
     time: Res<Time>,
 ) {
-    for (shooter_transform, mut shootable) in shooter_query.iter_mut() {
+    for (shooter_entity, shooter_transform, mut shootable) in shooter_query.iter_mut() {
         if shootable.is_shooting {
             shootable.time.tick(time.delta());
 
@@ -91,8 +95,10 @@ fn shooting_system(
 
                 commands
                     .entity(projectile)
-                    .insert(Name::new("Projectile"))
-                    .insert(Projectile)
+                    .insert(Name::new(format!("Projectile_{}", projectile.id())))
+                    .insert(Projectile {
+                        source: shooter_entity,
+                    })
                     .insert(Moveable {
                         direction: shootable.direction,
                         speed: 450.,
