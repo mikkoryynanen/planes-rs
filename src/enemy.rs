@@ -1,4 +1,4 @@
-use bevy::prelude::*;
+use bevy::{prelude::*, time::Stopwatch};
 
 use crate::{
     entities::entity_loader::{craete_entity_from_atlas, GameSheets},
@@ -46,5 +46,8 @@ fn setup(mut commands: Commands, sheets: Res<GameSheets>) {
         })
         .insert(Shootable {
             direction: Vec3::new(0., -1., 0.),
+            shoot_speed_per_ms: 500,
+            time: Stopwatch::new(),
+            is_shooting: true,
         });
 }

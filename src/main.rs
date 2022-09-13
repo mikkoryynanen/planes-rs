@@ -3,6 +3,8 @@ use bevy_editor_pls::EditorPlugin;
 use enemy::EnemyPlugin;
 use entities::entity_loader::{spawn_entity, TilemapPlugin};
 use event_system::EventSystemPlugin;
+use input_actions::InputAction;
+use leafwing_input_manager::prelude::*;
 use moveable::MoveablePlugin;
 use player::PlayerPlugin;
 
@@ -29,6 +31,7 @@ const BACKGROUND_SPRITE: &str = "background.png";
 mod enemy;
 mod entities;
 mod event_system;
+mod input_actions;
 mod moveable;
 mod player;
 mod projectile;
@@ -56,6 +59,7 @@ fn main() {
         // Game plugins =============================================
         .add_plugin(TilemapPlugin)
         .add_plugin(EventSystemPlugin)
+        .add_plugin(InputManagerPlugin::<InputAction>::default())
         // ==========================================================
         // Gameplay plugins =========================================
         .add_plugin(PlayerPlugin)
