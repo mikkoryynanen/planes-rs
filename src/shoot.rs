@@ -1,10 +1,8 @@
 use crate::{
     components::Collider,
-    enemy::Enemy,
     entities::entity_loader::{craete_entity_from_atlas, GameSheets},
     event_system::DamageEvent,
     moveable::Moveable,
-    player::Player,
     projectile::Projectile,
     SPRITE_SCALE,
 };
@@ -41,14 +39,14 @@ impl Plugin for ShootPlugin {
 fn collision_check(
     mut commands: Commands,
     mut damage_events: EventWriter<DamageEvent>,
-    entities_query: Query<(Entity, &Transform), With<Collider>>,
+    colliders_query: Query<(Entity, &Transform), With<Collider>>,
     projectiles_query: Query<(Entity, &Projectile, &Transform), With<Projectile>>,
 ) {
-    for (entity, entity_transform) in entities_query.iter() {
+    for (collider_entity, collider_transform) in colliders_query.iter() {
         for (projectile_entity, projectile, projectile_tranform) in projectiles_query.iter() {
-            if projectile.source != entity {
+            if projectile.source != collider_entity {
                 let collision = collide(
-                    entity_transform.translation,
+                    collider_transform.translation,
                     Vec2::splat(SPRITE_SCALE),
                     projectile_tranform.translation,
                     Vec2::splat(SPRITE_SCALE),
@@ -57,8 +55,8 @@ fn collision_check(
                     commands.entity(projectile_entity).despawn();
 
                     damage_events.send(DamageEvent {
-                        damage: 10,
-                        target: entity,
+                        damage: 50,
+                        target: collider_entity,
                     });
                 }
             }

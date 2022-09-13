@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::enemy::Enemy;
+use crate::components::Health;
 
 // TODO Maybe move these to their own file
 pub struct DamageEvent {
@@ -20,12 +20,12 @@ impl Plugin for EventSystemPlugin {
 fn process_damage_events(
     mut commands: Commands,
     mut events: EventReader<DamageEvent>,
-    mut enemy_query: Query<&mut Enemy>,
+    mut health_query: Query<&mut Health>,
 ) {
     for &DamageEvent { damage, target } in events.iter() {
-        if let Ok(mut enemy) = enemy_query.get_mut(target) {
-            enemy.take_damage(damage);
-            if enemy.health - damage <= 0 {
+        if let Ok(mut health) = health_query.get_mut(target) {
+            health.take_damage(damage);
+            if (health.amount - damage) <= 0 {
                 commands.entity(target).despawn();
             }
         }

@@ -1,7 +1,7 @@
 use bevy::{prelude::*, time::Stopwatch};
 
 use crate::{
-    components::Collider,
+    components::{Collider, Health},
     entities::entity_loader::{craete_entity_from_atlas, GameSheets},
     moveable::Moveable,
     shoot::Shootable,
@@ -9,15 +9,7 @@ use crate::{
 };
 
 #[derive(Component)]
-pub struct Enemy {
-    pub health: i32,
-}
-
-impl Enemy {
-    pub fn take_damage(&mut self, amount: i32) {
-        self.health -= amount;
-    }
-}
+pub struct Enemy;
 
 pub struct EnemyPlugin;
 
@@ -39,7 +31,8 @@ fn setup(mut commands: Commands, sheets: Res<GameSheets>) {
     commands
         .entity(enemy_entity)
         .insert(Name::new("Enemy"))
-        .insert(Enemy { health: 100 })
+        .insert(Enemy)
+        .insert(Health { amount: 100 })
         .insert(Collider)
         .insert(Moveable {
             auto_destroy: false,
