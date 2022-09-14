@@ -27,14 +27,9 @@ impl Plugin for PlayerPlugin {
     }
 }
 
-fn setup(mut commands: Commands, sheet: Res<GameSheets>) {
-    let player_entity = craete_entity_from_atlas(
-        &mut commands,
-        &sheet.planes,
-        2,
-        Vec3::new(0., 0., 100.),
-        SPRITE_SCALE,
-    );
+fn setup(mut commands: Commands, sheets: Res<GameSheets>) {
+    let player_entity =
+        craete_entity_from_atlas(&mut commands, &sheets.planes, 0, Vec3::new(0., 0., 100.));
 
     commands
         .entity(player_entity)

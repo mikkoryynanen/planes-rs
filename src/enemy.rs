@@ -5,7 +5,6 @@ use crate::{
     entities::entity_loader::{craete_entity_from_atlas, GameSheets},
     moveable::Moveable,
     shoot::Shootable,
-    SPRITE_SCALE,
 };
 
 #[derive(Component)]
@@ -20,13 +19,8 @@ impl Plugin for EnemyPlugin {
 }
 
 fn setup(mut commands: Commands, sheets: Res<GameSheets>) {
-    let enemy_entity = craete_entity_from_atlas(
-        &mut commands,
-        &sheets.planes,
-        3,
-        Vec3::new(0., 250., 0.),
-        SPRITE_SCALE,
-    );
+    let enemy_entity =
+        craete_entity_from_atlas(&mut commands, &sheets.planes, 0, Vec3::new(0., 250., 100.));
 
     commands
         .entity(enemy_entity)
@@ -37,7 +31,7 @@ fn setup(mut commands: Commands, sheets: Res<GameSheets>) {
         .insert(Moveable {
             auto_destroy: false,
             direction: Vec3::new(0., -1., 0.),
-            speed: 50.,
+            speed: 25.,
         })
         .insert(Shootable {
             direction: Vec3::new(0., -1., 0.),

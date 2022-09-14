@@ -762,6 +762,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "bevy_retro_camera"
+version = "1.1.0"
+source = "git+https://github.com/celerysaltgames/bevy_retro_camera.git#874b4c1c819caacec9d2ee316f076f247b9fb33c"
+dependencies = [
+ "bevy",
+]
+
+[[package]]
 name = "bevy_scene"
 version = "0.8.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2801,6 +2809,7 @@ dependencies = [
  "bevy",
  "bevy-inspector-egui",
  "bevy_editor_pls",
+ "bevy_retro_camera",
  "iyes_loopless",
  "leafwing-input-manager",
 ]

@@ -20,14 +20,12 @@ pub fn spawn_entity(
     asset_server: &Res<AssetServer>,
     asset_path: &str,
     translation: Vec3,
-    scale: Vec3,
 ) -> Entity {
     return commands
         .spawn_bundle(SpriteBundle {
             texture: asset_server.load(asset_path),
             transform: Transform {
                 translation: translation,
-                scale: scale,
                 ..Default::default()
             },
             ..Default::default()
@@ -40,11 +38,9 @@ pub fn craete_entity_from_atlas(
     atlas: &Handle<TextureAtlas>,
     index: usize,
     translation: Vec3,
-    scale: f32,
 ) -> Entity {
     let mut sprite = TextureAtlasSprite::new(index);
     sprite.color = Color::WHITE;
-    sprite.custom_size = Some(Vec2::splat(scale));
 
     return commands
         .spawn_bundle(SpriteSheetBundle {
@@ -52,7 +48,6 @@ pub fn craete_entity_from_atlas(
             texture_atlas: atlas.clone(),
             transform: Transform {
                 translation: translation,
-                scale: Vec3::splat(scale),
                 ..Default::default()
             },
             ..Default::default()

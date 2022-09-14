@@ -55,7 +55,7 @@ fn collision_check(
                     commands.entity(projectile_entity).despawn();
 
                     damage_events.send(DamageEvent {
-                        damage: 50,
+                        damage: 15,
                         target: collider_entity,
                     });
                 }
@@ -88,7 +88,6 @@ fn shooting_system(
                         shooter_transform.translation.y + 15.,
                         100.,
                     ),
-                    5.,
                 );
 
                 commands
