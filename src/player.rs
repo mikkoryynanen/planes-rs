@@ -35,7 +35,7 @@ fn setup(mut commands: Commands, sheets: Res<GameSheets>) {
 
     commands
         .entity(player_entity)
-        .insert(Name::new("Player"))
+        .insert(Name::new(format!("Player_{}", player_entity.id())))
         .insert(Player {
             speed: 450.,
             movement_direction: Vec2::new(0., 0.),
@@ -44,9 +44,10 @@ fn setup(mut commands: Commands, sheets: Res<GameSheets>) {
         // .insert(Collider) // TODO Enable once game states are done
         .insert(Shootable {
             direction: Vec3::new(0., 1., 0.),
+            source: player_entity,
             shoot_speed_per_ms: 500,
             time: Stopwatch::new(),
-            ..Default::default()
+            is_shooting: false,
         })
         .insert_bundle(InputManagerBundle::<InputAction> {
             action_state: ActionState::default(),

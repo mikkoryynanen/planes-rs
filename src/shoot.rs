@@ -4,30 +4,18 @@ use crate::{
     event_system::DamageEvent,
     moveable::Moveable,
     projectile::Projectile,
-    SPRITE_SCALE,
 };
 use bevy::{prelude::*, sprite::collide_aabb::collide, time::Stopwatch};
 
 #[derive(Component)]
 pub struct Shootable {
     pub direction: Vec3,
+    pub source: Entity,
 
     pub is_shooting: bool,
     pub shoot_speed_per_ms: u128,
     pub time: Stopwatch,
 }
-
-impl Default for Shootable {
-    fn default() -> Self {
-        Self {
-            direction: Default::default(),
-            shoot_speed_per_ms: Default::default(),
-            time: Default::default(),
-            is_shooting: false,
-        }
-    }
-}
-
 pub struct ShootPlugin;
 
 impl Plugin for ShootPlugin {
@@ -47,9 +35,9 @@ fn collision_check(
             if projectile.source != collider_entity {
                 let collision = collide(
                     collider_transform.translation,
-                    Vec2::splat(SPRITE_SCALE),
+                    Vec2::splat(16.),
                     projectile_tranform.translation,
-                    Vec2::splat(SPRITE_SCALE),
+                    Vec2::splat(16.),
                 );
                 if collision.is_some() {
                     commands.entity(projectile_entity).despawn();
@@ -66,11 +54,11 @@ fn collision_check(
 
 fn shooting_system(
     mut commands: Commands,
-    mut shooter_query: Query<(Entity, &mut Transform, &mut Shootable), With<Shootable>>,
+    mut shooter_query: Query<(&mut Transform, &mut Shootable), With<Shootable>>,
     sheet: Res<GameSheets>,
     time: Res<Time>,
 ) {
-    for (shooter_entity, shooter_transform, mut shootable) in shooter_query.iter_mut() {
+    for (shooter_transform, mut shootable) in shooter_query.iter_mut() {
         if shootable.is_shooting {
             shootable.time.tick(time.delta());
 
@@ -85,7 +73,7 @@ fn shooting_system(
                     0,
                     Vec3::new(
                         shooter_transform.translation.x,
-                        shooter_transform.translation.y + 15.,
+                        shooter_transform.translation.y,
                         100.,
                     ),
                 );
@@ -94,7 +82,7 @@ fn shooting_system(
                     .entity(projectile)
                     .insert(Name::new(format!("Projectile_{}", projectile.id())))
                     .insert(Projectile {
-                        source: shooter_entity,
+                        source: shootable.source,
                     })
                     .insert(Moveable {
                         direction: shootable.direction,
