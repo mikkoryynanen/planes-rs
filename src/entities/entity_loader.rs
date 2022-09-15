@@ -46,7 +46,6 @@ pub fn craete_entity_from_atlas(
 ) -> Entity {
     let mut sprite = TextureAtlasSprite::new(index);
     sprite.color = Color::WHITE;
-    // sprite.anchor = Anchor::BottomCenter;
 
     return commands
         .spawn_bundle(SpriteSheetBundle {
