@@ -1,4 +1,4 @@
-use bevy::{prelude::*, time::Stopwatch};
+use bevy::{math::vec3, prelude::*, time::Stopwatch};
 use leafwing_input_manager::{
     prelude::{ActionState, InputMap},
     InputManagerBundle,
@@ -15,6 +15,8 @@ use crate::{
 #[derive(Component)]
 pub struct Player {
     pub speed: f32,
+    // TODO sould be private
+    pub movement_direction: Vec2,
 }
 
 pub struct PlayerPlugin;
@@ -34,7 +36,10 @@ fn setup(mut commands: Commands, sheets: Res<GameSheets>) {
     commands
         .entity(player_entity)
         .insert(Name::new("Player"))
-        .insert(Player { speed: 450. })
+        .insert(Player {
+            speed: 450.,
+            movement_direction: Vec2::new(0., 0.),
+        })
         .insert(Health { amount: 100 })
         // .insert(Collider) // TODO Enable once game states are done
         .insert(Shootable {
@@ -45,48 +50,76 @@ fn setup(mut commands: Commands, sheets: Res<GameSheets>) {
         })
         .insert_bundle(InputManagerBundle::<InputAction> {
             action_state: ActionState::default(),
-            input_map: InputMap::new([(KeyCode::Space, InputAction::Shoot)]),
+            input_map: InputMap::new([
+                (KeyCode::Space, InputAction::Shoot),
+                (KeyCode::W, InputAction::Move_Up),
+                (KeyCode::S, InputAction::Move_Down),
+                (KeyCode::D, InputAction::Move_Left),
+                (KeyCode::A, InputAction::Move_Right),
+            ]),
         });
 }
 
 fn movement(
-    mut player_query: Query<(&Player, &mut Transform), With<Player>>,
-    keyboard: Res<Input<KeyCode>>,
+    mut player_query: Query<(&mut Player, &mut Transform), With<Player>>,
+    action_query: Query<&ActionState<InputAction>, With<Player>>,
     time: Res<Time>,
 ) {
-    let (player, mut player_transform) = player_query.single_mut();
+    // TODO Make editable from settings file
+    const MAX_SPEED: f32 = 500.;
+    const ACCELERATION: f32 = 1700.;
 
-    let mut y_delta = 0.;
-    if keyboard.pressed(KeyCode::W) {
-        y_delta += 1. * time.delta_seconds() * player.speed;
-    }
-    if keyboard.pressed(KeyCode::S) {
-        y_delta -= 1. * time.delta_seconds() * player.speed;
-    }
+    let (mut player, mut player_transform) = player_query.single_mut();
+    let action_state = action_query.single();
 
-    let mut x_delta = 0.;
-    if keyboard.pressed(KeyCode::A) {
-        x_delta -= 1. * time.delta_seconds() * player.speed;
-    }
-    if keyboard.pressed(KeyCode::D) {
-        x_delta += 1. * time.delta_seconds() * player.speed;
-    }
+    if action_state.pressed(InputAction::Move_Up) {
+        player.movement_direction.y += ACCELERATION * time.delta_seconds();
+    } else if action_state.pressed(InputAction::Move_Down) {
+        player.movement_direction.y -= ACCELERATION * time.delta_seconds();
+    } else if player.movement_direction != Vec2::ZERO {
+        // No input but still moving
+        let delta = ACCELERATION * time.delta_seconds();
+        if player.movement_direction.y < 0. {
+            player.movement_direction.y = (player.movement_direction.y + delta).min(0.);
+        } else {
+            player.movement_direction.y = (player.movement_direction.y - delta).max(0.);
+        }
+    };
 
-    player_transform.translation += Vec3::new(x_delta, y_delta, 0.);
+    if action_state.pressed(InputAction::Move_Left) {
+        player.movement_direction.x += ACCELERATION * time.delta_seconds();
+    } else if action_state.pressed(InputAction::Move_Right) {
+        player.movement_direction.x -= ACCELERATION * time.delta_seconds();
+    } else if player.movement_direction != Vec2::ZERO {
+        // No input but still moving
+        let delta = ACCELERATION * time.delta_seconds();
+        if player.movement_direction.x < 0. {
+            player.movement_direction.x = (player.movement_direction.x + delta).min(0.);
+        } else {
+            player.movement_direction.x = (player.movement_direction.x - delta).max(0.);
+        }
+    };
 
-    if player_transform.translation.x > SCREEN_HEIGHT * ASPECT_RATIO / 2. {
-        player_transform.translation.x = SCREEN_HEIGHT * ASPECT_RATIO / 2.;
-    }
-    if player_transform.translation.x <= -SCREEN_HEIGHT * ASPECT_RATIO / 2. {
-        player_transform.translation.x = -SCREEN_HEIGHT * ASPECT_RATIO / 2.;
-    }
+    player.movement_direction.x = player.movement_direction.x.clamp(-MAX_SPEED, MAX_SPEED);
+    player.movement_direction.y = player.movement_direction.y.clamp(-MAX_SPEED, MAX_SPEED);
+    player_transform.translation +=
+        Vec3::new(player.movement_direction.x, player.movement_direction.y, 0.)
+            * time.delta_seconds();
 
-    if player_transform.translation.y > SCREEN_HEIGHT / 2. {
-        player_transform.translation.y = SCREEN_HEIGHT / 2.;
-    }
-    if player_transform.translation.y <= -SCREEN_HEIGHT / 2. {
-        player_transform.translation.y = -SCREEN_HEIGHT / 2.;
-    }
+    // TODO Clamp to screen, with moving camera this does not work anymore
+    // if player_transform.translation.x > SCREEN_HEIGHT * ASPECT_RATIO / 2. {
+    //     player_transform.translation.x = SCREEN_HEIGHT * ASPECT_RATIO / 2.;
+    // }
+    // if player_transform.translation.x <= -SCREEN_HEIGHT * ASPECT_RATIO / 2. {
+    //     player_transform.translation.x = -SCREEN_HEIGHT * ASPECT_RATIO / 2.;
+    // }
+
+    // if player_transform.translation.y > SCREEN_HEIGHT / 2. {
+    //     player_transform.translation.y = SCREEN_HEIGHT / 2.;
+    // }
+    // if player_transform.translation.y <= -SCREEN_HEIGHT / 2. {
+    //     player_transform.translation.y = -SCREEN_HEIGHT / 2.;
+    // }
 }
 
 fn shooting_system(
