@@ -17,4 +17,4 @@ bevy-inspector-egui = "0.12.1"
 bevy_editor_pls = "0.1.1"
 leafwing-input-manager = "0.5.2"
 iyes_loopless = "0.7.1"
-bevy_retro_camera = { git = "https://github.com/celerysaltgames/bevy_retro_camera.git" }
+bevy_pixel_camera = { git = "https://github.com/drakmaniso/bevy_pixel_camera.git" }
