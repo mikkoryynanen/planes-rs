@@ -13,3 +13,6 @@ impl Health {
         self.amount -= amount;
     }
 }
+
+#[derive(Component)]
+pub struct Background;

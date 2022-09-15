@@ -1,8 +1,9 @@
-use bevy::{prelude::*, window::PresentMode};
+use bevy::{prelude::*, sprite::Anchor, window::PresentMode};
 use bevy_editor_pls::EditorPlugin;
-use bevy_retro_camera::{RetroCameraBundle, RetroCameraPlugin};
+use bevy_pixel_camera::{PixelCameraBundle, PixelCameraPlugin};
+use components::Background;
 use enemy::EnemyPlugin;
-use entities::entity_loader::{spawn_entity, TilemapPlugin};
+use entities::entity_loader::{craete_entity_from_atlas, spawn_entity, GameSheets, TilemapPlugin};
 use event_system::EventSystemPlugin;
 use input_actions::InputAction;
 use leafwing_input_manager::prelude::*;
@@ -16,6 +17,7 @@ use shoot::ShootPlugin;
 pub const BACKGROUND_COLOR: Color = Color::rgb(0.1, 0.1, 0.1);
 pub const ASPECT_RATIO: f32 = 16. / 9.;
 pub const SCREEN_HEIGHT: f32 = 180.;
+pub const SCROLL_SPEED: f32 = 15.;
 
 // Texture Atlas settings =========================
 pub const TILE_SIZE: f32 = 16.;
@@ -48,8 +50,9 @@ fn main() {
             present_mode: PresentMode::AutoVsync,
             ..Default::default()
         })
-        .add_plugin(RetroCameraPlugin)
+        .insert_resource(bevy::render::texture::ImageSettings::default_nearest())
         .add_plugins(DefaultPlugins)
+        .add_plugin(PixelCameraPlugin)
         // Development =============================================
         .add_plugin(EditorPlugin)
         .add_plugin(WorldInspectorPlugin::new())
@@ -72,21 +75,36 @@ fn main() {
         .run();
 }
 
-fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
-    let scale: f32 = 2.; // Viewport scaling factor
-    commands.spawn_bundle(RetroCameraBundle::fixed_height(SCREEN_HEIGHT, scale));
+fn setup(mut commands: Commands, asset_server: Res<AssetServer>, sheets: Res<GameSheets>) {
+    commands.spawn_bundle(PixelCameraBundle::from_resolution(
+        SCREEN_HEIGHT as i32,
+        (SCREEN_HEIGHT * ASPECT_RATIO) as i32,
+    ));
+
+    let tower = craete_entity_from_atlas(
+        &mut commands,
+        &sheets.general,
+        24,
+        Vec3::new(100., 100., 10.),
+    );
+    commands.entity(tower).insert(Name::new("Tower"));
 
     let background = spawn_entity(
         &mut commands,
         &asset_server,
         BACKGROUND_SPRITE,
-        Vec3::new(0., 7108.0, 0.),
+        Vec3::new(0., -50., 0.),
+        Anchor::BottomCenter,
     );
-    commands.entity(background).insert(Name::new("Background"));
+    commands
+        .entity(background)
+        .insert(Name::new("Background"))
+        .insert(Background)
+        .push_children(&[tower]);
 }
 
-fn move_camera(mut moveable_query: Query<&mut Transform, With<Camera2d>>, time: Res<Time>) {
+fn move_camera(mut moveable_query: Query<&mut Transform, With<Background>>, time: Res<Time>) {
     for mut moveable_transform in moveable_query.iter_mut() {
-        moveable_transform.translation += Vec3::new(0., 5. * time.delta_seconds(), -1.);
+        moveable_transform.translation -= Vec3::new(0., SCROLL_SPEED * time.delta_seconds(), 0.);
     }
 }

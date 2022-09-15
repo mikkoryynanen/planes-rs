@@ -1,4 +1,4 @@
-use bevy::prelude::*;
+use bevy::{prelude::*, sprite::Anchor};
 
 use crate::{PLANES_PATH, TILES_PATH, TILE_PADDING, TILE_SIZE};
 
@@ -20,9 +20,14 @@ pub fn spawn_entity(
     asset_server: &Res<AssetServer>,
     asset_path: &str,
     translation: Vec3,
+    anchor_override: Anchor,
 ) -> Entity {
     return commands
         .spawn_bundle(SpriteBundle {
+            sprite: Sprite {
+                anchor: anchor_override,
+                ..Default::default()
+            },
             texture: asset_server.load(asset_path),
             transform: Transform {
                 translation: translation,
@@ -41,6 +46,7 @@ pub fn craete_entity_from_atlas(
 ) -> Entity {
     let mut sprite = TextureAtlasSprite::new(index);
     sprite.color = Color::WHITE;
+    // sprite.anchor = Anchor::BottomCenter;
 
     return commands
         .spawn_bundle(SpriteSheetBundle {
