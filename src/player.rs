@@ -106,20 +106,19 @@ fn movement(
         Vec3::new(player.movement_direction.x, player.movement_direction.y, 0.)
             * time.delta_seconds();
 
-    // TODO Clamp to screen, with moving camera this does not work anymore
-    // if player_transform.translation.x > SCREEN_HEIGHT * ASPECT_RATIO / 2. {
-    //     player_transform.translation.x = SCREEN_HEIGHT * ASPECT_RATIO / 2.;
-    // }
-    // if player_transform.translation.x <= -SCREEN_HEIGHT * ASPECT_RATIO / 2. {
-    //     player_transform.translation.x = -SCREEN_HEIGHT * ASPECT_RATIO / 2.;
-    // }
+    if player_transform.translation.x > SCREEN_HEIGHT * ASPECT_RATIO {
+        player_transform.translation.x = SCREEN_HEIGHT * ASPECT_RATIO;
+    }
+    if player_transform.translation.x <= -SCREEN_HEIGHT * ASPECT_RATIO {
+        player_transform.translation.x = -SCREEN_HEIGHT * ASPECT_RATIO;
+    }
 
-    // if player_transform.translation.y > SCREEN_HEIGHT / 2. {
-    //     player_transform.translation.y = SCREEN_HEIGHT / 2.;
-    // }
-    // if player_transform.translation.y <= -SCREEN_HEIGHT / 2. {
-    //     player_transform.translation.y = -SCREEN_HEIGHT / 2.;
-    // }
+    if player_transform.translation.y > SCREEN_HEIGHT {
+        player_transform.translation.y = SCREEN_HEIGHT;
+    }
+    if player_transform.translation.y <= -SCREEN_HEIGHT {
+        player_transform.translation.y = -SCREEN_HEIGHT;
+    }
 }
 
 fn shooting_system(
