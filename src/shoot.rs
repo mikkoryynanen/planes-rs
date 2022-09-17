@@ -45,6 +45,7 @@ fn collision_check(
                     damage_events.send(DamageEvent {
                         damage: 15,
                         target: collider_entity,
+                        translation: projectile_tranform.translation,
                     });
                 }
             }

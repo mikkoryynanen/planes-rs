@@ -1,10 +1,11 @@
-use bevy::{math::vec3, prelude::*, time::Stopwatch};
+use bevy::{asset, math::vec3, prelude::*, time::Stopwatch};
 use leafwing_input_manager::{
     prelude::{ActionState, InputMap},
     InputManagerBundle,
 };
 
 use crate::{
+    animation::{spawn_animated_entity, AnimationSheet},
     components::{Collider, Health},
     entities::entity_loader::{craete_entity_from_atlas, GameSheets},
     input_actions::InputAction,
@@ -15,6 +16,7 @@ use crate::{
 #[derive(Component)]
 pub struct Player {
     pub speed: f32,
+    pub target_animation_frame: usize,
     // TODO sould be private
     pub movement_direction: Vec2,
 }
@@ -29,9 +31,17 @@ impl Plugin for PlayerPlugin {
     }
 }
 
-fn setup(mut commands: Commands, sheets: Res<GameSheets>) {
-    let player_entity =
-        craete_entity_from_atlas(&mut commands, &sheets.planes, 0, Vec3::new(0., 0., 100.));
+fn setup(mut commands: Commands, asset_server: Res<AssetServer>, sheets: Res<GameSheets>) {
+    let animation_sheet = AnimationSheet {
+        handle: sheets.planes.clone(),
+        frames: [0, 1, 2],
+    };
+    let player_entity = spawn_animated_entity(
+        &mut commands,
+        asset_server,
+        Vec3::new(0., 0., 100.),
+        &animation_sheet,
+    );
 
     commands
         .entity(player_entity)
@@ -39,6 +49,7 @@ fn setup(mut commands: Commands, sheets: Res<GameSheets>) {
         .insert(Player {
             speed: 450.,
             movement_direction: Vec2::new(0., 0.),
+            target_animation_frame: 1, // Default position
         })
         .insert(Health { amount: 100 })
         // .insert(Collider) // TODO Enable once game states are done
@@ -55,8 +66,8 @@ fn setup(mut commands: Commands, sheets: Res<GameSheets>) {
                 (KeyCode::Space, InputAction::Shoot),
                 (KeyCode::W, InputAction::Move_Up),
                 (KeyCode::S, InputAction::Move_Down),
-                (KeyCode::D, InputAction::Move_Left),
-                (KeyCode::A, InputAction::Move_Right),
+                (KeyCode::A, InputAction::Move_Left),
+                (KeyCode::D, InputAction::Move_Right),
             ]),
         });
 }
@@ -88,10 +99,13 @@ fn movement(
     };
 
     if action_state.pressed(InputAction::Move_Left) {
-        player.movement_direction.x += ACCELERATION * time.delta_seconds();
-    } else if action_state.pressed(InputAction::Move_Right) {
         player.movement_direction.x -= ACCELERATION * time.delta_seconds();
+        player.target_animation_frame = 0;
+    } else if action_state.pressed(InputAction::Move_Right) {
+        player.movement_direction.x += ACCELERATION * time.delta_seconds();
+        player.target_animation_frame = 2;
     } else if player.movement_direction != Vec2::ZERO {
+        player.target_animation_frame = 1;
         // No input but still moving
         let delta = ACCELERATION * time.delta_seconds();
         if player.movement_direction.x < 0. {

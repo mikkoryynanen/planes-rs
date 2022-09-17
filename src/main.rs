@@ -1,3 +1,4 @@
+use animation::AnimatorPlugin;
 use bevy::{prelude::*, sprite::Anchor, window::PresentMode};
 use bevy_editor_pls::EditorPlugin;
 use bevy_pixel_camera::{PixelCameraBundle, PixelCameraPlugin};
@@ -23,7 +24,7 @@ pub const SCROLL_SPEED: f32 = 15.;
 pub const TILE_SIZE: f32 = 16.;
 pub const TILE_PADDING: f32 = 1.;
 pub const TILES_PATH: &str = "tiles.png";
-pub const PLANES_PATH: &str = "Sheets/Ships/Variation 1/JetFighter-Var1-Spritesheet.png";
+pub const PLANES_PATH: &str = "player_plane.png";
 // ================================================
 
 // Sprite settings ================================
@@ -40,6 +41,7 @@ mod player;
 mod projectile;
 mod shoot;
 // TODO Generic file for components, maybe replace this in the future
+mod animation;
 mod components;
 
 fn main() {
@@ -69,6 +71,7 @@ fn main() {
         .add_plugin(MoveablePlugin)
         .add_plugin(EnemyPlugin)
         .add_plugin(ShootPlugin)
+        .add_plugin(AnimatorPlugin)
         // ==========================================================
         .add_startup_system(setup)
         .add_system(move_camera)
