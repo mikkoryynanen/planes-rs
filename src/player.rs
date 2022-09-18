@@ -31,16 +31,17 @@ impl Plugin for PlayerPlugin {
     }
 }
 
-fn setup(mut commands: Commands, asset_server: Res<AssetServer>, sheets: Res<GameSheets>) {
+fn setup(mut commands: Commands, sheets: Res<GameSheets>) {
     let animation_sheet = AnimationSheet {
         handle: sheets.planes.clone(),
-        frames: [0, 1, 2],
+        frames: vec![0, 1, 2],
     };
     let player_entity = spawn_animated_entity(
         &mut commands,
-        asset_server,
         Vec3::new(0., 0., 100.),
         &animation_sheet,
+        0.2,
+        true,
     );
 
     commands

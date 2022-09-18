@@ -19,18 +19,20 @@ pub struct FrameAnimation {
     timer: Timer,
     frames: Vec<usize>,
     current_frame: usize,
+    is_looping: bool,
 }
 
 pub struct AnimationSheet {
     pub handle: Handle<TextureAtlas>,
-    pub frames: [usize; 3],
+    pub frames: Vec<usize>,
 }
 
 pub fn spawn_animated_entity(
     commands: &mut Commands,
-    asset_server: Res<AssetServer>,
     translation: Vec3,
     animation_sheet: &AnimationSheet,
+    frame_duration: f32,
+    is_looping: bool,
 ) -> Entity {
     let animated_sprite = TextureAtlasSprite::new(animation_sheet.frames[0]);
 
@@ -45,29 +47,41 @@ pub fn spawn_animated_entity(
             ..Default::default()
         })
         .insert(FrameAnimation {
-            timer: Timer::from_seconds(0.2, true),
-            frames: animation_sheet.frames.to_vec(),
+            timer: Timer::from_seconds(frame_duration, is_looping),
+            frames: animation_sheet.frames.clone(),
             current_frame: 0,
+            is_looping: is_looping,
         })
         .id();
 }
 
 fn loop_animated_frames(
-    mut sprites_query: Query<(&mut TextureAtlasSprite, &mut FrameAnimation)>,
+    mut commands: Commands,
+    mut sprites_query: Query<
+        (Entity, &mut TextureAtlasSprite, &mut FrameAnimation),
+        Without<Player>,
+    >,
     time: Res<Time>,
 ) {
-    //  for (mut sprite, mut animation) in sprites_query.iter_mut() {
-    //      animation.timer.tick(time.delta());
-    //      if animation.timer.just_finished() {
-    //          animation.current_frame = (animation.current_frame + 1) % animation.frames.len();
-    //          sprite.index = animation.frames[animation.current_frame];
-    //      }
-    //  }
+    for (entity, mut sprite, mut animation) in sprites_query.iter_mut() {
+        animation.timer.tick(time.delta());
+        if animation.timer.just_finished() {
+            animation.current_frame = (animation.current_frame + 1) % animation.frames.len();
+            sprite.index = animation.frames[animation.current_frame];
+
+            if !animation.is_looping && sprite.index == animation.frames[animation.frames.len() - 1]
+            {
+                commands.entity(entity).despawn();
+            }
+
+            animation.timer.reset();
+        }
+    }
 }
 
 // TODO Maybe make this usable to other animated entities
 fn animate_player(
-    mut sprites_query: Query<(&mut TextureAtlasSprite, &mut FrameAnimation, &Player)>,
+    mut sprites_query: Query<(&mut TextureAtlasSprite, &mut FrameAnimation, &Player), With<Player>>,
     time: Res<Time>,
 ) {
     for (mut sprite, mut animation, player) in sprites_query.iter_mut() {
@@ -79,7 +93,6 @@ fn animate_player(
                 } else {
                     animation.current_frame -= 1;
                 }
-                println!("animation.current_frame {}", animation.current_frame);
                 sprite.index = animation.frames[animation.current_frame];
             }
         }

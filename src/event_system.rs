@@ -1,6 +1,7 @@
 use bevy::prelude::*;
 
 use crate::{
+    animation::{spawn_animated_entity, AnimationSheet, FrameAnimation},
     components::Health,
     entities::entity_loader::{craete_entity_from_atlas, GameSheets},
 };
@@ -39,7 +40,12 @@ fn process_damage_events(
                 commands.entity(target).despawn();
             }
 
-            let splash = craete_entity_from_atlas(&mut commands, &sheets.general, 6, translation);
+            let animation_sheet = AnimationSheet {
+                handle: sheets.general.clone(),
+                frames: vec![4, 8, 9],
+            };
+
+            let _ = spawn_animated_entity(&mut commands, translation, &animation_sheet, 0.1, false);
         }
     }
 }
