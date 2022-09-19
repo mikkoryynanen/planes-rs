@@ -1,6 +1,7 @@
 use bevy::prelude::*;
+use iyes_loopless::prelude::ConditionSet;
 
-use crate::SCREEN_HEIGHT;
+use crate::{GameState, SCREEN_HEIGHT};
 #[derive(Component)]
 pub struct Moveable {
     pub direction: Vec3,
@@ -12,7 +13,12 @@ pub struct MoveablePlugin;
 
 impl Plugin for MoveablePlugin {
     fn build(&self, app: &mut App) {
-        app.add_system(update_moveables);
+        app.add_system_set(
+            ConditionSet::new()
+                .run_in_state(GameState::InGame)
+                .with_system(update_moveables)
+                .into(),
+        );
     }
 }
 

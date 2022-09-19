@@ -1,11 +1,9 @@
 use crate::{
-    components::Collider,
-    entities::entity_loader::{craete_entity_from_atlas, GameSheets},
-    event_system::DamageEvent,
-    moveable::Moveable,
-    projectile::Projectile,
+    components::Collider, entities::entity_loader::craete_entity_from_atlas,
+    event_system::DamageEvent, moveable::Moveable, projectile::Projectile, CoreAssets, GameState,
 };
 use bevy::{prelude::*, sprite::collide_aabb::collide, time::Stopwatch};
+use iyes_loopless::prelude::ConditionSet;
 
 #[derive(Component)]
 pub struct Shootable {
@@ -20,7 +18,13 @@ pub struct ShootPlugin;
 
 impl Plugin for ShootPlugin {
     fn build(&self, app: &mut App) {
-        app.add_system(collision_check).add_system(shooting_system);
+        app.add_system_set(
+            ConditionSet::new()
+                .run_in_state(GameState::InGame)
+                .with_system(collision_check)
+                .with_system(shooting_system)
+                .into(),
+        );
     }
 }
 
@@ -56,7 +60,7 @@ fn collision_check(
 fn shooting_system(
     mut commands: Commands,
     mut shooter_query: Query<(&mut Transform, &mut Shootable), With<Shootable>>,
-    sheet: Res<GameSheets>,
+    core_asssets: Res<CoreAssets>,
     time: Res<Time>,
 ) {
     for (shooter_transform, mut shootable) in shooter_query.iter_mut() {
@@ -70,7 +74,7 @@ fn shooting_system(
 
                 let projectile = craete_entity_from_atlas(
                     &mut commands,
-                    &sheet.general,
+                    &core_asssets.general,
                     0,
                     Vec3::new(
                         shooter_transform.translation.x,

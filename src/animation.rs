@@ -1,16 +1,19 @@
-use bevy::{prelude::*, sprite::Anchor};
+use bevy::prelude::*;
+use iyes_loopless::prelude::ConditionSet;
 
-use crate::{
-    entities::entity_loader::{spawn_entity, GameSheets},
-    player::Player,
-};
+use crate::{player::Player, GameState};
 
 pub struct AnimatorPlugin;
 
 impl Plugin for AnimatorPlugin {
     fn build(&self, app: &mut App) {
-        app.add_system(loop_animated_frames)
-            .add_system(animate_player);
+        app.add_system_set(
+            ConditionSet::new()
+                .run_in_state(GameState::InGame)
+                .with_system(loop_animated_frames)
+                .with_system(animate_player)
+                .into(),
+        );
     }
 }
 

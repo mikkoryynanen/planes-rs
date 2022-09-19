@@ -18,3 +18,7 @@ bevy_editor_pls = "0.1.1"
 leafwing-input-manager = "0.5.2"
 iyes_loopless = "0.7.1"
 bevy_pixel_camera = { git = "https://github.com/drakmaniso/bevy_pixel_camera.git" }
+serde = "1.0.144"
+serde_derive = "1.0.144"
+toml = "0.5.9"
+bevy_asset_loader = { version = "0.12.1", features = ["stageless", "dynamic_assets", "2d"]}

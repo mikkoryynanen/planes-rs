@@ -1,10 +1,12 @@
 use bevy::{prelude::*, time::Stopwatch};
+use iyes_loopless::prelude::AppLooplessStateExt;
 
 use crate::{
     components::{Collider, Health},
-    entities::entity_loader::{craete_entity_from_atlas, GameSheets},
+    entities::entity_loader::craete_entity_from_atlas,
     moveable::Moveable,
     shoot::Shootable,
+    CoreAssets, GameState,
 };
 
 #[derive(Component)]
@@ -14,13 +16,17 @@ pub struct EnemyPlugin;
 
 impl Plugin for EnemyPlugin {
     fn build(&self, app: &mut App) {
-        app.add_startup_system(setup);
+        app.add_enter_system(GameState::InGame, setup);
     }
 }
 
-fn setup(mut commands: Commands, sheets: Res<GameSheets>) {
-    let enemy_entity =
-        craete_entity_from_atlas(&mut commands, &sheets.planes, 0, Vec3::new(0., 50., 100.));
+fn setup(mut commands: Commands, core_asssets: Res<CoreAssets>) {
+    let enemy_entity = craete_entity_from_atlas(
+        &mut commands,
+        &core_asssets.plane,
+        0,
+        Vec3::new(0., 50., 100.),
+    );
 
     commands
         .entity(enemy_entity)

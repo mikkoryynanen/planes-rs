@@ -1,4 +1,5 @@
-use bevy::{asset, math::vec3, prelude::*, time::Stopwatch};
+use bevy::{prelude::*, time::Stopwatch};
+use iyes_loopless::prelude::{AppLooplessStateExt, ConditionSet};
 use leafwing_input_manager::{
     prelude::{ActionState, InputMap},
     InputManagerBundle,
@@ -6,16 +7,16 @@ use leafwing_input_manager::{
 
 use crate::{
     animation::{spawn_animated_entity, AnimationSheet},
-    components::{Collider, Health},
-    entities::entity_loader::{craete_entity_from_atlas, GameSheets},
+    components::Health,
     input_actions::InputAction,
     shoot::Shootable,
-    ASPECT_RATIO, SCREEN_HEIGHT, SPRITE_SCALE,
+    CoreAssets, GameState, ASPECT_RATIO, SCREEN_HEIGHT,
 };
 
 #[derive(Component)]
 pub struct Player {
-    pub speed: f32,
+    pub movement_speed: f32,
+    pub max_speed: f32,
     pub target_animation_frame: usize,
     // TODO sould be private
     pub movement_direction: Vec2,
@@ -25,21 +26,29 @@ pub struct PlayerPlugin;
 
 impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut App) {
-        app.add_startup_system(setup)
-            .add_system(movement)
-            .add_system(shooting_system);
+        app.add_system_set(
+            ConditionSet::new()
+                .run_in_state(GameState::InGame)
+                .with_system(movement)
+                .with_system(shooting_system)
+                .into(),
+        )
+        .add_enter_system(GameState::InGame, setup);
     }
 }
 
-fn setup(mut commands: Commands, sheets: Res<GameSheets>) {
-    let animation_sheet = AnimationSheet {
-        handle: sheets.planes.clone(),
-        frames: vec![0, 1, 2],
-    };
+fn setup(
+    mut commands: Commands,
+    core_asssets: Res<CoreAssets>,
+    // config: Res<ConfigData>
+) {
     let player_entity = spawn_animated_entity(
         &mut commands,
         Vec3::new(0., 0., 100.),
-        &animation_sheet,
+        &AnimationSheet {
+            handle: core_asssets.plane.clone(),
+            frames: vec![0, 1, 2],
+        },
         0.2,
         true,
     );
@@ -48,7 +57,8 @@ fn setup(mut commands: Commands, sheets: Res<GameSheets>) {
         .entity(player_entity)
         .insert(Name::new(format!("Player_{}", player_entity.id())))
         .insert(Player {
-            speed: 450.,
+            movement_speed: 450.,
+            max_speed: 500.,
             movement_direction: Vec2::new(0., 0.),
             target_animation_frame: 1, // Default position
         })
@@ -78,20 +88,16 @@ fn movement(
     action_query: Query<&ActionState<InputAction>, With<Player>>,
     time: Res<Time>,
 ) {
-    // TODO Make editable from settings file
-    const MAX_SPEED: f32 = 500.;
-    const ACCELERATION: f32 = 1700.;
-
     let (mut player, mut player_transform) = player_query.single_mut();
     let action_state = action_query.single();
 
     if action_state.pressed(InputAction::Move_Up) {
-        player.movement_direction.y += ACCELERATION * time.delta_seconds();
+        player.movement_direction.y += player.movement_speed * time.delta_seconds();
     } else if action_state.pressed(InputAction::Move_Down) {
-        player.movement_direction.y -= ACCELERATION * time.delta_seconds();
+        player.movement_direction.y -= player.movement_speed * time.delta_seconds();
     } else if player.movement_direction != Vec2::ZERO {
         // No input but still moving
-        let delta = ACCELERATION * time.delta_seconds();
+        let delta = player.movement_speed * time.delta_seconds();
         if player.movement_direction.y < 0. {
             player.movement_direction.y = (player.movement_direction.y + delta).min(0.);
         } else {
@@ -100,15 +106,15 @@ fn movement(
     };
 
     if action_state.pressed(InputAction::Move_Left) {
-        player.movement_direction.x -= ACCELERATION * time.delta_seconds();
+        player.movement_direction.x -= player.movement_speed * time.delta_seconds();
         player.target_animation_frame = 0;
     } else if action_state.pressed(InputAction::Move_Right) {
-        player.movement_direction.x += ACCELERATION * time.delta_seconds();
+        player.movement_direction.x += player.movement_speed * time.delta_seconds();
         player.target_animation_frame = 2;
     } else if player.movement_direction != Vec2::ZERO {
         player.target_animation_frame = 1;
         // No input but still moving
-        let delta = ACCELERATION * time.delta_seconds();
+        let delta = player.movement_speed * time.delta_seconds();
         if player.movement_direction.x < 0. {
             player.movement_direction.x = (player.movement_direction.x + delta).min(0.);
         } else {
@@ -116,8 +122,14 @@ fn movement(
         }
     };
 
-    player.movement_direction.x = player.movement_direction.x.clamp(-MAX_SPEED, MAX_SPEED);
-    player.movement_direction.y = player.movement_direction.y.clamp(-MAX_SPEED, MAX_SPEED);
+    player.movement_direction.x = player
+        .movement_direction
+        .x
+        .clamp(-player.max_speed, player.max_speed);
+    player.movement_direction.y = player
+        .movement_direction
+        .y
+        .clamp(-player.max_speed, player.max_speed);
     player_transform.translation +=
         Vec3::new(player.movement_direction.x, player.movement_direction.y, 0.)
             * time.delta_seconds();
