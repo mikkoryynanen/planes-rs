@@ -16,23 +16,11 @@ use player::PlayerPlugin;
 // use bevy::diagnostic::{FrameTimeDiagnosticsPlugin, LogDiagnosticsPlugin};
 use bevy_inspector_egui::WorldInspectorPlugin;
 use shoot::ShootPlugin;
-use utils::load_config::load_config;
+use utils::load_config::ConfigData;
+
+use crate::utils::load_config::load_config;
 
 pub const BACKGROUND_COLOR: Color = Color::rgb(0.1, 0.1, 0.1);
-pub const ASPECT_RATIO: f32 = 16. / 9.;
-pub const SCREEN_HEIGHT: f32 = 180.;
-pub const SCROLL_SPEED: f32 = 15.;
-
-// Texture Atlas settings =========================
-pub const TILE_SIZE: f32 = 16.;
-pub const TILE_PADDING: f32 = 1.;
-pub const TILES_PATH: &str = "tiles.png";
-pub const PLANES_PATH: &str = "player_plane.png";
-// ================================================
-
-// Sprite settings ================================
-pub const SPRITE_SCALE: f32 = 1.;
-// ================================================
 
 mod enemy;
 mod entities;
@@ -123,24 +111,28 @@ fn main() {
         // ==========================================================
         .add_enter_system(GameState::MainMenu, setup_main_menu)
         .add_enter_system(GameState::InGame, setup_in_game)
-        .add_system(move_camera)
+        .add_system(move_camera.run_in_state(GameState::InGame))
         .run();
 }
 
 fn setup_main_menu(mut commands: Commands, menu_assets: Res<MenuAssets>) {
+    let data = load_config();
+    commands.insert_resource(data);
+
     println!("setting up main menu. Main menu NYI, moving straight to core...");
     commands.insert_resource(NextState(GameState::LoadingInGame));
 }
 
-fn setup_in_game(mut commands: Commands, core_assets: Res<CoreAssets>) {
+fn setup_in_game(
+    mut commands: Commands,
+    mut core_assets: ResMut<CoreAssets>,
+    config: Res<ConfigData>,
+) {
     println!("Setting up in-game...");
 
-    // let data = load_config();
-    // commands.insert_resource(data);
-
     commands.spawn_bundle(PixelCameraBundle::from_resolution(
-        SCREEN_HEIGHT as i32,
-        (SCREEN_HEIGHT * ASPECT_RATIO) as i32,
+        config.general.screen_height as i32,
+        (config.general.screen_height * config.general.base_aspect_ratio) as i32,
     ));
 
     // let tower = craete_entity_from_atlas(
@@ -165,8 +157,13 @@ fn setup_in_game(mut commands: Commands, core_assets: Res<CoreAssets>) {
         ;
 }
 
-fn move_camera(mut moveable_query: Query<&mut Transform, With<Background>>, time: Res<Time>) {
+fn move_camera(
+    mut moveable_query: Query<&mut Transform, With<Background>>,
+    time: Res<Time>,
+    config: Res<ConfigData>,
+) {
     for mut moveable_transform in moveable_query.iter_mut() {
-        moveable_transform.translation -= Vec3::new(0., SCROLL_SPEED * time.delta_seconds(), 0.);
+        moveable_transform.translation -=
+            Vec3::new(0., config.general.scroll_speed * time.delta_seconds(), 0.);
     }
 }

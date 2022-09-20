@@ -10,7 +10,8 @@ use crate::{
     components::Health,
     input_actions::InputAction,
     shoot::Shootable,
-    CoreAssets, GameState, ASPECT_RATIO, SCREEN_HEIGHT,
+    utils::load_config::ConfigData,
+    CoreAssets, GameState,
 };
 
 #[derive(Component)]
@@ -37,11 +38,7 @@ impl Plugin for PlayerPlugin {
     }
 }
 
-fn setup(
-    mut commands: Commands,
-    core_asssets: Res<CoreAssets>,
-    // config: Res<ConfigData>
-) {
+fn setup(mut commands: Commands, core_asssets: Res<CoreAssets>, config: Res<ConfigData>) {
     let player_entity = spawn_animated_entity(
         &mut commands,
         Vec3::new(0., 0., 100.),
@@ -57,17 +54,20 @@ fn setup(
         .entity(player_entity)
         .insert(Name::new(format!("Player_{}", player_entity.id())))
         .insert(Player {
-            movement_speed: 450.,
-            max_speed: 500.,
+            movement_speed: config.player.movement_speed,
+            max_speed: config.player.max_speed,
             movement_direction: Vec2::new(0., 0.),
             target_animation_frame: 1, // Default position
         })
-        .insert(Health { amount: 100 })
+        .insert(Health {
+            // TODO: calcuate total value from upgrades
+            amount: config.player.base_health,
+        })
         // .insert(Collider) // TODO Enable once game states are done
         .insert(Shootable {
             direction: Vec3::new(0., 1., 0.),
             source: player_entity,
-            shoot_speed_per_ms: 500,
+            shoot_speed_per_ms: 500, // TODO To be calculated from upgrades
             time: Stopwatch::new(),
             is_shooting: false,
         })
@@ -87,6 +87,7 @@ fn movement(
     mut player_query: Query<(&mut Player, &mut Transform), With<Player>>,
     action_query: Query<&ActionState<InputAction>, With<Player>>,
     time: Res<Time>,
+    config: Res<ConfigData>,
 ) {
     let (mut player, mut player_transform) = player_query.single_mut();
     let action_state = action_query.single();
@@ -134,18 +135,24 @@ fn movement(
         Vec3::new(player.movement_direction.x, player.movement_direction.y, 0.)
             * time.delta_seconds();
 
-    if player_transform.translation.x > SCREEN_HEIGHT * ASPECT_RATIO {
-        player_transform.translation.x = SCREEN_HEIGHT * ASPECT_RATIO;
+    if player_transform.translation.x
+        > config.general.screen_height * config.general.base_aspect_ratio
+    {
+        player_transform.translation.x =
+            config.general.screen_height * config.general.base_aspect_ratio;
     }
-    if player_transform.translation.x <= -SCREEN_HEIGHT * ASPECT_RATIO {
-        player_transform.translation.x = -SCREEN_HEIGHT * ASPECT_RATIO;
+    if player_transform.translation.x
+        <= -config.general.screen_height * config.general.base_aspect_ratio
+    {
+        player_transform.translation.x =
+            -config.general.screen_height * config.general.base_aspect_ratio;
     }
 
-    if player_transform.translation.y > SCREEN_HEIGHT {
-        player_transform.translation.y = SCREEN_HEIGHT;
+    if player_transform.translation.y > config.general.screen_height {
+        player_transform.translation.y = config.general.screen_height;
     }
-    if player_transform.translation.y <= -SCREEN_HEIGHT {
-        player_transform.translation.y = -SCREEN_HEIGHT;
+    if player_transform.translation.y <= -config.general.screen_height {
+        player_transform.translation.y = -config.general.screen_height;
     }
 }
 

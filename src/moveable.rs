@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use iyes_loopless::prelude::ConditionSet;
 
-use crate::{GameState, SCREEN_HEIGHT};
+use crate::{utils::load_config::ConfigData, GameState};
 #[derive(Component)]
 pub struct Moveable {
     pub direction: Vec3,
@@ -26,6 +26,7 @@ fn update_moveables(
     mut commands: Commands,
     mut moveable_query: Query<(Entity, &mut Transform, &Moveable), With<Moveable>>,
     time: Res<Time>,
+    config: Res<ConfigData>,
 ) {
     for (entity, mut moveable_transform, moveable) in moveable_query.iter_mut() {
         moveable_transform.translation += Vec3::new(
@@ -39,7 +40,7 @@ fn update_moveables(
         moveable_transform.rotation = Quat::from_rotation_z(angle);
 
         if moveable.auto_destroy {
-            if moveable_transform.translation.y > SCREEN_HEIGHT
+            if moveable_transform.translation.y > config.general.screen_height
             //  || moveable_transform.translation.y < 0.
             {
                 commands.entity(entity).despawn();
