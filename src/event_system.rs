@@ -53,7 +53,6 @@ fn process_damage_events(
                 commands.entity(target).despawn();
 
                 // TODO Spawn X amount of collectables once enemy is destroyed
-
             }
 
             let animation_sheet = AnimationSheet {
@@ -70,13 +69,8 @@ fn process_damage_events(
     }
 }
 
-fn process_collection_events(
-    mut commands: Commands,
-    mut events: EventReader<CollectionEvent>,
-) {
+fn process_collection_events(mut commands: Commands, mut events: EventReader<CollectionEvent>) {
     for &CollectionEvent in events.iter() {
         println!("collection event");
-
-        
     }
 }

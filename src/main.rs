@@ -70,10 +70,10 @@ struct CoreAssets {
     #[asset(path = "player.png")]
     pub plane: Handle<TextureAtlas>,
 
-    #[asset(texture_atlas(tile_size_x = 16., tile_size_y = 16., columns = 2, rows = 1))]
-    #[asset(path = "player_shadow.png")]
-    pub plane_shadow: Handle<TextureAtlas>,
-
+    // TODO implement this by copying the player sprite and setting it to black
+    // #[asset(texture_atlas(tile_size_x = 16., tile_size_y = 16., columns = 2, rows = 1))]
+    // #[asset(path = "player_shadow.png")]
+    // pub plane_shadow: Handle<TextureAtlas>,
     #[asset(path = "background_0.png")]
     pub background: Handle<Image>,
 

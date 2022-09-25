@@ -30,6 +30,23 @@ pub struct AnimationSheet {
     pub frames: Vec<usize>,
 }
 
+pub fn spawn_animated_entity_with_color(
+    commands: &mut Commands,
+    translation: Vec3,
+    animation_sheet: &AnimationSheet,
+    frame_duration: f32,
+    is_looping: bool,
+    color: Color,
+) -> Entity {
+    return build_animated_entity(
+        commands,
+        translation,
+        animation_sheet,
+        frame_duration,
+        is_looping,
+        color,
+    );
+}
 pub fn spawn_animated_entity(
     commands: &mut Commands,
     translation: Vec3,
@@ -37,7 +54,26 @@ pub fn spawn_animated_entity(
     frame_duration: f32,
     is_looping: bool,
 ) -> Entity {
-    let animated_sprite = TextureAtlasSprite::new(animation_sheet.frames[0]);
+    return build_animated_entity(
+        commands,
+        translation,
+        animation_sheet,
+        frame_duration,
+        is_looping,
+        Color::WHITE,
+    );
+}
+
+fn build_animated_entity(
+    commands: &mut Commands,
+    translation: Vec3,
+    animation_sheet: &AnimationSheet,
+    frame_duration: f32,
+    is_looping: bool,
+    color: Color,
+) -> Entity {
+    let mut animated_sprite = TextureAtlasSprite::new(animation_sheet.frames[0]);
+    animated_sprite.color = color;
 
     return commands
         .spawn_bundle(SpriteSheetBundle {

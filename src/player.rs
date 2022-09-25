@@ -6,7 +6,7 @@ use leafwing_input_manager::{
 };
 
 use crate::{
-    animation::{spawn_animated_entity, AnimationSheet},
+    animation::{spawn_animated_entity, spawn_animated_entity_with_color, AnimationSheet},
     collision::Collider,
     components::Health,
     input_actions::InputAction,
@@ -51,15 +51,16 @@ fn setup(mut commands: Commands, core_assets: Res<CoreAssets>, config: Res<Confi
         true,
     );
 
-    let player_shadow = spawn_animated_entity(
+    let player_shadow = spawn_animated_entity_with_color(
         &mut commands,
         Vec3::new(0., 0., 100.),
         &AnimationSheet {
-            handle: core_assets.plane_shadow.clone(),
+            handle: core_assets.plane.clone(),
             frames: vec![0],
         },
         0.2,
         true,
+        Color::rgba(0., 0., 0., 0.5),
     );
 
     commands
