@@ -1,9 +1,6 @@
 use bevy::prelude::Component;
 
 #[derive(Component)]
-pub struct Collider;
-
-#[derive(Component)]
 pub struct Health {
     pub amount: i32,
 }
@@ -16,3 +13,6 @@ impl Health {
 
 #[derive(Component)]
 pub struct Background;
+
+#[derive(Component)]
+pub struct Collectable;

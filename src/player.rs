@@ -7,6 +7,7 @@ use leafwing_input_manager::{
 
 use crate::{
     animation::{spawn_animated_entity, AnimationSheet},
+    collision::Collider,
     components::Health,
     input_actions::InputAction,
     shoot::Shootable,
@@ -38,17 +39,32 @@ impl Plugin for PlayerPlugin {
     }
 }
 
-fn setup(mut commands: Commands, core_asssets: Res<CoreAssets>, config: Res<ConfigData>) {
+fn setup(mut commands: Commands, core_assets: Res<CoreAssets>, config: Res<ConfigData>) {
     let player_entity = spawn_animated_entity(
         &mut commands,
         Vec3::new(0., 0., 100.),
         &AnimationSheet {
-            handle: core_asssets.plane.clone(),
-            frames: vec![0, 1, 2],
+            handle: core_assets.plane.clone(),
+            frames: vec![0, 1],
         },
         0.2,
         true,
     );
+
+    let player_shadow = spawn_animated_entity(
+        &mut commands,
+        Vec3::new(0., 0., 100.),
+        &AnimationSheet {
+            handle: core_assets.plane_shadow.clone(),
+            frames: vec![0],
+        },
+        0.2,
+        true,
+    );
+
+    commands
+        .entity(player_shadow)
+        .insert(Transform::from_xyz(-15., -15., -1.));
 
     commands
         .entity(player_entity)
@@ -57,13 +73,13 @@ fn setup(mut commands: Commands, core_asssets: Res<CoreAssets>, config: Res<Conf
             movement_speed: config.player.movement_speed,
             max_speed: config.player.max_speed,
             movement_direction: Vec2::new(0., 0.),
-            target_animation_frame: 1, // Default position
+            target_animation_frame: 0, // Default position
         })
         .insert(Health {
             // TODO: calcuate total value from upgrades
             amount: config.player.base_health,
         })
-        // .insert(Collider) // TODO Enable once game states are done
+        .insert(Collider)
         .insert(Shootable {
             direction: Vec3::new(0., 1., 0.),
             source: player_entity,
@@ -80,7 +96,8 @@ fn setup(mut commands: Commands, core_asssets: Res<CoreAssets>, config: Res<Conf
                 (KeyCode::A, InputAction::Move_Left),
                 (KeyCode::D, InputAction::Move_Right),
             ]),
-        });
+        })
+        .add_child(player_shadow);
 }
 
 fn movement(
@@ -108,12 +125,12 @@ fn movement(
 
     if action_state.pressed(InputAction::Move_Left) {
         player.movement_direction.x -= player.movement_speed * time.delta_seconds();
-        player.target_animation_frame = 0;
+        // player.target_animation_frame = 0;
     } else if action_state.pressed(InputAction::Move_Right) {
         player.movement_direction.x += player.movement_speed * time.delta_seconds();
-        player.target_animation_frame = 2;
+        // player.target_animation_frame = 2;
     } else if player.movement_direction != Vec2::ZERO {
-        player.target_animation_frame = 1;
+        // player.target_animation_frame = 1;
         // No input but still moving
         let delta = player.movement_speed * time.delta_seconds();
         if player.movement_direction.x < 0. {
@@ -123,6 +140,7 @@ fn movement(
         }
     };
 
+    // Apply movment
     player.movement_direction.x = player
         .movement_direction
         .x
@@ -135,25 +153,27 @@ fn movement(
         Vec3::new(player.movement_direction.x, player.movement_direction.y, 0.)
             * time.delta_seconds();
 
-    if player_transform.translation.x
-        > config.general.screen_height * config.general.base_aspect_ratio
-    {
-        player_transform.translation.x =
-            config.general.screen_height * config.general.base_aspect_ratio;
-    }
-    if player_transform.translation.x
-        <= -config.general.screen_height * config.general.base_aspect_ratio
-    {
-        player_transform.translation.x =
-            -config.general.screen_height * config.general.base_aspect_ratio;
-    }
+    // Clamp movement to screen
+    // TODO: Enable
+    // if player_transform.translation.x
+    //     > config.general.screen_height * config.general.base_aspect_ratio
+    // {
+    //     player_transform.translation.x =
+    //         config.general.screen_height * config.general.base_aspect_ratio;
+    // }
+    // if player_transform.translation.x
+    //     <= -config.general.screen_height * config.general.base_aspect_ratio
+    // {
+    //     player_transform.translation.x =
+    //         -config.general.screen_height * config.general.base_aspect_ratio;
+    // }
 
-    if player_transform.translation.y > config.general.screen_height {
-        player_transform.translation.y = config.general.screen_height;
-    }
-    if player_transform.translation.y <= -config.general.screen_height {
-        player_transform.translation.y = -config.general.screen_height;
-    }
+    // if player_transform.translation.y > config.general.screen_height {
+    //     player_transform.translation.y = config.general.screen_height;
+    // }
+    // if player_transform.translation.y <= -config.general.screen_height {
+    //     player_transform.translation.y = -config.general.screen_height;
+    // }
 }
 
 fn shooting_system(

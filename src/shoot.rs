@@ -1,5 +1,5 @@
 use crate::{
-    components::Collider, entities::entity_loader::craete_entity_from_atlas,
+    collision::Collider, entities::entity_loader::craete_entity_from_atlas,
     event_system::DamageEvent, moveable::Moveable, projectile::Projectile, CoreAssets, GameState,
 };
 use bevy::{prelude::*, sprite::collide_aabb::collide, time::Stopwatch};
@@ -21,7 +21,7 @@ impl Plugin for ShootPlugin {
         app.add_system_set(
             ConditionSet::new()
                 .run_in_state(GameState::InGame)
-                .with_system(collision_check)
+                // .with_system(collision_check)
                 .with_system(shooting_system)
                 .into(),
         );
@@ -48,7 +48,7 @@ fn collision_check(
 
                     damage_events.send(DamageEvent {
                         damage: 15,
-                        target: collider_entity,
+                        target: projectile_entity,
                         translation: projectile_tranform.translation,
                     });
                 }
@@ -89,6 +89,7 @@ fn shooting_system(
                     .insert(Projectile {
                         source: shootable.source,
                     })
+                    .insert(Collider)
                     .insert(Moveable {
                         direction: shootable.direction,
                         speed: 450.,

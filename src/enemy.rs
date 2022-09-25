@@ -2,11 +2,8 @@ use bevy::{prelude::*, time::Stopwatch};
 use iyes_loopless::prelude::AppLooplessStateExt;
 
 use crate::{
-    components::{Collider, Health},
-    entities::entity_loader::craete_entity_from_atlas,
-    moveable::Moveable,
-    shoot::Shootable,
-    CoreAssets, GameState,
+    collision::Collider, components::Health, entities::entity_loader::craete_entity_from_atlas,
+    moveable::Moveable, shoot::Shootable, CoreAssets, GameState,
 };
 
 #[derive(Component)]

@@ -1,11 +1,11 @@
 [general]
 base_aspect_ratio = 1.77 # 16:9
-screen_height = 180.0
+screen_height = 140.0
 scroll_speed = 15.0
 
 [paths]
 tiles_path = "tiles.png"
-planes_path = "player_plane.png"
+planes_path = "player_ship_loop.png.png"
 background_path = "background_0.png"
 
 [sprites]
