@@ -136,9 +136,9 @@ fn main() {
         // ==========================================================
         // Gameplay plugins =========================================
         .add_plugin(PlayerPlugin)
+        .add_plugin(ShootPlugin)
         .add_plugin(MoveablePlugin)
         .add_plugin(EnemyPlugin)
-        .add_plugin(ShootPlugin)
         .add_plugin(AnimatorPlugin)
         .add_plugin(CollisionPlugin)
         // ==========================================================

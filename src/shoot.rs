@@ -1,6 +1,7 @@
 use crate::{
-    collision::Collider, entities::entity_loader::craete_entity_from_atlas,
-    event_system::DamageEvent, moveable::Moveable, projectile::Projectile, CoreAssets, GameState,
+    collision::Collider, enemy::Enemy, entities::entity_loader::craete_entity_from_atlas,
+    event_system::DamageEvent, moveable::Moveable, player::Player, projectile::Projectile,
+    CoreAssets, GameState,
 };
 use bevy::{prelude::*, sprite::collide_aabb::collide, time::Stopwatch};
 use iyes_loopless::prelude::ConditionSet;
@@ -21,39 +22,9 @@ impl Plugin for ShootPlugin {
         app.add_system_set(
             ConditionSet::new()
                 .run_in_state(GameState::InGame)
-                // .with_system(collision_check)
                 .with_system(shooting_system)
                 .into(),
         );
-    }
-}
-
-fn collision_check(
-    mut commands: Commands,
-    mut damage_events: EventWriter<DamageEvent>,
-    colliders_query: Query<(Entity, &Transform), With<Collider>>,
-    projectiles_query: Query<(Entity, &Projectile, &Transform), With<Projectile>>,
-) {
-    for (collider_entity, collider_transform) in colliders_query.iter() {
-        for (projectile_entity, projectile, projectile_tranform) in projectiles_query.iter() {
-            if projectile.source != collider_entity {
-                let collision = collide(
-                    collider_transform.translation,
-                    Vec2::splat(16.),
-                    projectile_tranform.translation,
-                    Vec2::splat(16.),
-                );
-                if collision.is_some() {
-                    commands.entity(projectile_entity).despawn();
-
-                    damage_events.send(DamageEvent {
-                        damage: 15,
-                        target: projectile_entity,
-                        translation: projectile_tranform.translation,
-                    });
-                }
-            }
-        }
     }
 }
 
@@ -93,7 +64,7 @@ fn shooting_system(
                     .insert(Moveable {
                         direction: shootable.direction,
                         speed: 450.,
-                        auto_destroy: true,
+                        auto_destroy: false,
                     });
             }
         }

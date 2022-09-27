@@ -35,7 +35,7 @@ impl Plugin for EventSystemPlugin {
 
 fn process_damage_events(
     mut commands: Commands,
-    mut events: EventReader<DamageEvent>,
+    mut damage_events: EventReader<DamageEvent>,
     mut health_query: Query<&mut Health>,
     core_asssets: Res<CoreAssets>,
     mut score: ResMut<Score>,
@@ -45,7 +45,7 @@ fn process_damage_events(
         damage,
         target,
         translation,
-    } in events.iter()
+    } in damage_events.iter()
     {
         if let Ok(mut health) = health_query.get_mut(target) {
             health.take_damage(damage);

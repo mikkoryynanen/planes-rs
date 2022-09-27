@@ -1,12 +1,17 @@
 use bevy::{
-    prelude::{Commands, Component, Entity, EventWriter, Plugin, Query, Transform, Vec2, With},
+    prelude::{
+        Commands, Component, Entity, EventWriter, Plugin, Query, Transform, Vec2, With, Without,
+    },
     sprite::collide_aabb::collide,
 };
 use iyes_loopless::prelude::ConditionSet;
 
 use crate::{
     components::Collectable,
+    enemy::Enemy,
     event_system::{CollectionEvent, DamageEvent},
+    player::Player,
+    projectile::Projectile,
     GameState,
 };
 
@@ -20,31 +25,48 @@ impl Plugin for CollisionPlugin {
         app.add_system_set(
             ConditionSet::new()
                 .run_in_state(GameState::InGame)
-                .with_system(collision_check_damageables)
+                .with_system(collision_check_projectile)
                 .with_system(collision_check_collectables)
                 .into(),
         );
     }
 }
 
-fn collision_check_damageables(
-    colliders_query: Query<(Entity, &Transform), With<Collider>>,
+fn collision_check_projectile(
+    mut commands: Commands,
+    colliders_query: Query<
+        (Entity, &Transform),
+        (With<Collider>, With<Enemy>, Without<Collectable>),
+    >,
+    projectiles_query: Query<(Entity, &Projectile, &Transform), With<Projectile>>,
     mut damage_events: EventWriter<DamageEvent>,
 ) {
-    let (collision, entity, transform) = has_collision(&colliders_query);
-    if collision {
-        println!("There is colllision");
-        damage_events.send(DamageEvent {
-            damage: 15,
-            target: entity.unwrap(),
-            translation: transform.unwrap().translation,
-        });
+    for (collider_entity, collider_transform) in colliders_query.iter() {
+        for (projectile_entity, projectile, projectile_tranform) in projectiles_query.iter() {
+            if projectile_entity != collider_entity && projectile.source != collider_entity {
+                let collision = collide(
+                    collider_transform.translation,
+                    Vec2::splat(16.),
+                    projectile_tranform.translation,
+                    Vec2::splat(16.),
+                );
+                if collision.is_some() {
+                    commands.entity(projectile_entity).despawn();
+
+                    damage_events.send(DamageEvent {
+                        damage: 15,
+                        target: collider_entity,
+                        translation: projectile_tranform.translation,
+                    });
+                }
+            }
+        }
     }
 }
 
 fn collision_check_collectables(
     mut commands: Commands,
-    colliders_query: Query<(Entity, &Transform), With<Collider>>,
+    colliders_query: Query<(Entity, &Transform), With<Player>>,
     collectables_query: Query<(Entity, &Transform), With<Collectable>>,
     mut collection_events: EventWriter<CollectionEvent>,
 ) {
