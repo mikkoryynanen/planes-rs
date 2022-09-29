@@ -17,6 +17,7 @@ use input_actions::InputAction;
 use iyes_loopless::prelude::*;
 use leafwing_input_manager::prelude::*;
 use moveable::MoveablePlugin;
+use movement::path_movement::{PathMoveable, PathMovementPlugin};
 use player::PlayerPlugin;
 
 // use bevy::diagnostic::{FrameTimeDiagnosticsPlugin, LogDiagnosticsPlugin};
@@ -48,6 +49,7 @@ mod plugins;
 mod utils;
 // mod asset_collections;
 mod collision;
+mod movement;
 
 #[derive(Clone, Eq, PartialEq, Debug, Hash)]
 enum GameState {
@@ -138,6 +140,7 @@ fn main() {
         .add_plugin(PlayerPlugin)
         .add_plugin(ShootPlugin)
         .add_plugin(MoveablePlugin)
+        .add_plugin(PathMovementPlugin) // TODO: this should be in enemy wave spawner?
         .add_plugin(EnemyPlugin)
         .add_plugin(AnimatorPlugin)
         .add_plugin(CollisionPlugin)

@@ -1,7 +1,7 @@
 [general]
 base_aspect_ratio = 1.77 # 16:9
 screen_height = 140.0
-scroll_speed = 15.0
+scroll_speed = 5.0
 
 [paths]
 tiles_path = "tiles.png"
