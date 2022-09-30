@@ -10,7 +10,6 @@ use bevy_editor_pls::EditorPlugin;
 use bevy_pixel_camera::{PixelCameraBundle, PixelCameraPlugin};
 use collision::CollisionPlugin;
 use components::Background;
-use enemy::EnemyPlugin;
 use entities::entity_loader::spawn_entity;
 use event_system::EventSystemPlugin;
 use input_actions::InputAction;
@@ -23,6 +22,7 @@ use player::PlayerPlugin;
 // use bevy::diagnostic::{FrameTimeDiagnosticsPlugin, LogDiagnosticsPlugin};
 use bevy_inspector_egui::WorldInspectorPlugin;
 use shoot::ShootPlugin;
+use spawners::enemy_wave_spawner::EnemyWaveSpawnerPlugin;
 use utils::load_config::ConfigData;
 
 use crate::{
@@ -50,6 +50,7 @@ mod utils;
 // mod asset_collections;
 mod collision;
 mod movement;
+mod spawners;
 
 #[derive(Clone, Eq, PartialEq, Debug, Hash)]
 enum GameState {
@@ -63,7 +64,7 @@ enum GameState {
 struct MenuAssets {}
 
 #[derive(AssetCollection)]
-struct CoreAssets {
+pub struct CoreAssets {
     #[asset(texture_atlas(tile_size_x = 16., tile_size_y = 16., columns = 12, rows = 10))]
     #[asset(path = "tiles.png")]
     pub general: Handle<TextureAtlas>,
@@ -141,9 +142,10 @@ fn main() {
         .add_plugin(ShootPlugin)
         .add_plugin(MoveablePlugin)
         .add_plugin(PathMovementPlugin) // TODO: this should be in enemy wave spawner?
-        .add_plugin(EnemyPlugin)
+        // .add_plugin(EnemyPlugin)
         .add_plugin(AnimatorPlugin)
         .add_plugin(CollisionPlugin)
+        .add_plugin(EnemyWaveSpawnerPlugin)
         // ==========================================================
         .insert_resource(Score { amount: 0 })
         // ==========================================================

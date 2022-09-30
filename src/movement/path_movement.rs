@@ -1,5 +1,3 @@
-use std::f32::consts::FRAC_PI_2;
-
 use bevy::prelude::*;
 use iyes_loopless::prelude::ConditionSet;
 
@@ -30,7 +28,7 @@ fn movement(
 ) {
     // TODO: Move these to correct places
     let array: [(f32, f32); 3] = [(-100., 0.), (100., 100.), (100., -100.)];
-    let movement_speed = 3.;
+    let movement_speed = 1.;
 
     for (mut transform, mut path_moveable, entity) in query.iter_mut() {
         // Movement
