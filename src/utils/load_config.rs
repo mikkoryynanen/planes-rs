@@ -9,6 +9,7 @@ pub struct ConfigData {
     pub sprites: Sprites,
     pub player: Player,
     pub animations: Animations,
+    pub enemies: Enemies,
 }
 
 #[derive(Deserialize)]
@@ -44,6 +45,12 @@ pub struct Animations {
     pub default_frame_duration: f32,
     pub explosion_frame_duratioon: f32,
 }
+
+#[derive(Deserialize)]
+pub struct Enemies {
+    pub movement_speed: f32,
+}
+
 // =============================================================
 
 pub fn load_config() -> ConfigData {

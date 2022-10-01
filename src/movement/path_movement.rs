@@ -1,11 +1,13 @@
 use bevy::prelude::*;
 use iyes_loopless::prelude::ConditionSet;
 
-use crate::GameState;
+use crate::{spawners::enemy_wave_spawner::WaveData, GameState};
 
 #[derive(Component)]
 pub struct PathMoveable {
     pub next_path_index: usize,
+    pub move_positions: Vec<Vec2>,
+    pub movement_speed: f32,
 }
 
 pub struct PathMovementPlugin;
@@ -23,29 +25,22 @@ impl Plugin for PathMovementPlugin {
 
 fn movement(
     mut commands: Commands,
-    mut query: Query<(&mut Transform, &mut PathMoveable, Entity), With<PathMoveable>>,
-    time: Res<Time>,
+    mut path_moveable_query: Query<(&mut Transform, &mut PathMoveable, Entity), With<PathMoveable>>,
 ) {
-    // TODO: Move these to correct places
-    let array: [(f32, f32); 3] = [(-100., 0.), (100., 100.), (100., -100.)];
-    let movement_speed = 1.;
-
-    for (mut transform, mut path_moveable, entity) in query.iter_mut() {
+    for (mut transform, mut path_moveable, entity) in path_moveable_query.iter_mut() {
         // Movement
-        let target = Vec3::new(
-            array[path_moveable.next_path_index].0,
-            array[path_moveable.next_path_index].1,
-            0.,
-        );
+        let target = path_moveable.move_positions[path_moveable.next_path_index].extend(100.);
         let difference = target - transform.translation;
         let dot = Vec3::dot(difference, difference);
-        if dot < 1. + movement_speed && path_moveable.next_path_index < array.len() {
+        if dot < 1. + path_moveable.movement_speed
+            && path_moveable.next_path_index < path_moveable.move_positions.len()
+        {
             path_moveable.next_path_index += 1;
         } else {
-            transform.translation += difference.normalize() * movement_speed;
+            transform.translation += difference.normalize() * path_moveable.movement_speed;
         }
 
-        if path_moveable.next_path_index >= array.len() {
+        if path_moveable.next_path_index >= path_moveable.move_positions.len() {
             commands.entity(entity).despawn();
         }
 

@@ -1,6 +1,6 @@
 [general]
 base_aspect_ratio = 1.77 # 16:9
-screen_height = 140.0
+screen_height = 130.0
 scroll_speed = 5.0
 
 [paths]
@@ -22,3 +22,5 @@ max_speed = 500.0
 default_frame_duration = 0.2
 explosion_frame_duratioon = 0.1
 
+[enemies]
+movement_speed = 1.0
