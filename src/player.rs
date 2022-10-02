@@ -34,78 +34,14 @@ impl Plugin for PlayerPlugin {
                 .with_system(movement)
                 .with_system(shooting_system)
                 .into(),
-        )
-        .add_enter_system(GameState::InGame, setup);
+        );
     }
-}
-
-fn setup(mut commands: Commands, core_assets: Res<CoreAssets>, config: Res<ConfigData>) {
-    let player_entity = spawn_animated_entity(
-        &mut commands,
-        Vec3::new(0., 0., 100.),
-        &AnimationSheet {
-            handle: core_assets.plane.clone(),
-            frames: vec![0, 1],
-        },
-        0.2,
-        true,
-    );
-
-    let player_shadow = spawn_animated_entity_with_color(
-        &mut commands,
-        Vec3::new(0., 0., 100.),
-        &AnimationSheet {
-            handle: core_assets.plane.clone(),
-            frames: vec![0],
-        },
-        0.2,
-        true,
-        Color::rgba(0., 0., 0., 0.5),
-    );
-
-    commands
-        .entity(player_shadow)
-        .insert(Transform::from_xyz(-15., -15., -1.));
-
-    commands
-        .entity(player_entity)
-        .insert(Name::new(format!("Player_{}", player_entity.id())))
-        .insert(Player {
-            movement_speed: config.player.movement_speed,
-            max_speed: config.player.max_speed,
-            movement_direction: Vec2::new(0., 0.),
-            target_animation_frame: 0, // Default position
-        })
-        .insert(Health {
-            // TODO: calcuate total value from upgrades
-            amount: config.player.base_health,
-        })
-        .insert(Collider)
-        .insert(Shootable {
-            direction: Vec3::new(0., 1., 0.),
-            source: player_entity,
-            shoot_speed_per_ms: 500, // TODO To be calculated from upgrades
-            time: Stopwatch::new(),
-            is_shooting: false,
-        })
-        .insert_bundle(InputManagerBundle::<InputAction> {
-            action_state: ActionState::default(),
-            input_map: InputMap::new([
-                (KeyCode::Space, InputAction::Shoot),
-                (KeyCode::W, InputAction::Move_Up),
-                (KeyCode::S, InputAction::Move_Down),
-                (KeyCode::A, InputAction::Move_Left),
-                (KeyCode::D, InputAction::Move_Right),
-            ]),
-        })
-        .add_child(player_shadow);
 }
 
 fn movement(
     mut player_query: Query<(&mut Player, &mut Transform), With<Player>>,
     action_query: Query<&ActionState<InputAction>, With<Player>>,
     time: Res<Time>,
-    config: Res<ConfigData>,
 ) {
     let (mut player, mut player_transform) = player_query.single_mut();
     let action_state = action_query.single();

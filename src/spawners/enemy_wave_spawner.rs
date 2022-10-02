@@ -7,7 +7,10 @@ use iyes_loopless::{
     state::NextState,
 };
 
-use crate::{enemy::spawn_enemy, utils::load_config::ConfigData, CoreAssets, GameState};
+use crate::{
+    enemy::spawn_enemy, movement::path_movement::PathMoveable, utils::load_config::ConfigData,
+    CoreAssets, GameState,
+};
 
 pub struct Wave {
     enemies_to_spawn: usize,
@@ -73,6 +76,7 @@ impl Plugin for EnemyWaveSpawnerPlugin {
 fn spawn_wave(
     mut commands: Commands,
     camera_query: Query<&Transform, With<PixelProjection>>,
+    path_moveables_query: Query<&PathMoveable>,
     core_asssets: Res<CoreAssets>,
     mut wave_data: ResMut<WaveData>,
     config: Res<ConfigData>,
@@ -99,8 +103,10 @@ fn spawn_wave(
             }
         }
     } else {
-        println!("level completed");
+        if path_moveables_query.iter().len() <= 0 {
+            println!("level completed");
 
-        // commands.insert_resource(NextState(GameState::LoadingMainMenu));
+            commands.insert_resource(NextState(GameState::GameOver));
+        }
     }
 }

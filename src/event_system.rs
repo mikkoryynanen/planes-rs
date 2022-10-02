@@ -1,11 +1,12 @@
-use bevy::prelude::*;
-use iyes_loopless::prelude::ConditionSet;
-
 use crate::{
     animation::{spawn_animated_entity, AnimationSheet},
-    components::Health,
+    collision::Collider,
+    components::{Collectable, Health},
     CoreAssets, GameState, Score, UIScore,
 };
+use bevy::prelude::*;
+use iyes_loopless::prelude::ConditionSet;
+use rand::Rng;
 
 // Events ========================================
 // TODO Maybe move these to their own file
@@ -37,7 +38,7 @@ fn process_damage_events(
     mut commands: Commands,
     mut damage_events: EventReader<DamageEvent>,
     mut health_query: Query<&mut Health>,
-    core_asssets: Res<CoreAssets>,
+    core_assets: Res<CoreAssets>,
     mut score: ResMut<Score>,
     mut score_query: Query<&mut Text, With<UIScore>>,
 ) {
@@ -52,11 +53,30 @@ fn process_damage_events(
             if (health.amount - damage) <= 0 {
                 commands.entity(target).despawn();
 
-                // TODO Spawn X amount of collectables once enemy is destroyed
+                let random_number = rand::thread_rng().gen_range(0..5);
+                for index in 0..random_number {
+                    let random_position = rand::thread_rng().gen_range(0..50);
+                    let collectable = spawn_animated_entity(
+                        &mut commands,
+                        translation + Vec3::new(random_position as f32, random_position as f32, 0.),
+                        &AnimationSheet {
+                            handle: core_assets.collectable.clone(),
+                            frames: vec![0, 1, 2, 3, 4],
+                        },
+                        0.2,
+                        true,
+                    );
+
+                    commands
+                        .entity(collectable)
+                        .insert(Name::new("Collectable"))
+                        .insert(Collectable)
+                        .insert(Collider);
+                }
             }
 
             let animation_sheet = AnimationSheet {
-                handle: core_asssets.general.clone(),
+                handle: core_assets.general.clone(),
                 frames: vec![4, 8, 9],
             };
 

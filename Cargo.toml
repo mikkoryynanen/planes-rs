@@ -22,3 +22,4 @@ serde = "1.0.144"
 serde_derive = "1.0.144"
 toml = "0.5.9"
 bevy_asset_loader = { version = "0.12.1", features = ["stageless", "dynamic_assets", "2d"]}
+rand = "0.8"

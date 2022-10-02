@@ -1,9 +1,8 @@
 use crate::{
-    collision::Collider, enemy::Enemy, entities::entity_loader::craete_entity_from_atlas,
-    event_system::DamageEvent, moveable::Moveable, player::Player, projectile::Projectile,
-    CoreAssets, GameState,
+    collision::Collider, entities::entity_loader::craete_entity_from_atlas, moveable::Moveable,
+    projectile::Projectile, CoreAssets, GameState,
 };
-use bevy::{prelude::*, sprite::collide_aabb::collide, time::Stopwatch};
+use bevy::{prelude::*, time::Stopwatch};
 use iyes_loopless::prelude::ConditionSet;
 
 #[derive(Component)]
